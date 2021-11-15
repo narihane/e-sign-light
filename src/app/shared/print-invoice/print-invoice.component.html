@@ -1,0 +1,116 @@
+<!-- <div *ngIf="form !== undefined">
+  <h4>Client Name: {{form.fixed.client_name}}</h4>
+</div> -->
+
+<div class="container">
+  <div class="row">
+    <!-- BEGIN INVOICE -->
+    <div class="col-xs-12">
+      <div class="grid invoice">
+         <!-- *ngIf="form !== undefined"> -->
+        <div class="grid-body">
+          <div class="invoice-title">
+            <div class="row">
+              <div class="col-lg-12 text-center" >
+                <img src="../../../assets/img/logo_invoice.png" alt="" height="150">
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="col-md-6">
+                <h4>Invoice
+                  <span class="small"> #{{form.fixed.invoice_id}}</span>
+                </h4>
+              </div>
+              <div class="col-md-6 text-right">
+                <h4>Branch
+                  <span class="small"> {{form.fixed.branch}}</span>
+                </h4>
+              </div>
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="col-md-6">
+              <address>
+                <strong>Issued To: </strong>
+                <span class="small">{{form.fixed.client_name}}</span><br>
+                <abbr title="Phone">P:</abbr> <span class="small">{{form.fixed.client_phone}}</span>
+              </address>
+            </div>
+            <div class="col-lg-6 text-right">
+              <address>
+                <strong>Order Date:</strong><br>
+                <span class="small">{{dateNow}}</span>
+              </address>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <address>
+                <strong>Payment Method: </strong>
+                <span class="small">{{form.fixed.payment_type}}</span><br>
+                <strong>Email: </strong> <span class="small">{{form.fixed.client_email}}</span><br>
+              </address>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <h3>ORDER SUMMARY</h3>
+              <table class="table table-striped">
+                <thead>
+                  <tr class="line">
+                    <!-- <td><strong>#</strong></td>
+                    <td class="text-center"><strong>PROJECT</strong></td>
+                    <td class="text-center"><strong>HRS</strong></td>
+                    <td class="text-right"><strong>RATE</strong></td>
+                    <td class="text-right"><strong>SUBTOTAL</strong></td> -->
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- <tr>
+                    <td>1</td>
+                    <td><strong>Template Design</strong><br>A website template is a pre-designed webpage, or set of
+                      webpages, that anyone can modify with their own content and images to setup a website.</td>
+                    <td class="text-center">15</td>
+                    <td class="text-center">$75</td>
+                    <td class="text-right">$1,125.00</td>
+                  </tr>
+                  <tr>
+                    <td>2</td>
+                    <td><strong>Template Development</strong><br>Web development is a broad term for the work involved
+                      in developing a web site for the Internet (World Wide Web) or an intranet (a private network).
+                    </td>
+                    <td class="text-center">15</td>
+                    <td class="text-center">$75</td>
+                    <td class="text-right">$1,125.00</td>
+                  </tr>
+                  <tr class="line">
+                    <td>3</td>
+                    <td><strong>Testing</strong><br>Take measures to check the quality, performance, or reliability of
+                      (something), especially before putting it into widespread use or practice.</td>
+                    <td class="text-center">2</td>
+                    <td class="text-center">$75</td>
+                    <td class="text-right">$150.00</td>
+                  </tr> -->
+                  <tr>
+                    <td colspan="3"></td>
+                    <td class="text-right"><strong>Taxes</strong></td>
+                    <td class="text-right"><strong>N/A</strong></td>
+                  </tr>
+                  <tr>
+                    <td colspan="3">
+                    </td>
+                    <td class="text-right"><strong>Total</strong></td>
+                    <td class="text-right"><strong>{{form.fixed.totalPrice}}</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END INVOICE -->
+  </div>
+</div>
