@@ -31,6 +31,9 @@ import { GetInvoicesComponent } from './get-invoices/get-invoices.component';
 import { LoginComponent } from './login/login.component';
 import { CodesService } from './shared/_services/codes.service';
 import { DocumentService } from './shared/_services/document.service';
+import { IssuerService } from './shared/_services/issuer.service';
+import { NotificationService } from './shared/_services/notifications.service';
+import { ToastrModule, ToastrService } from 'ngx-toastr';
 
 @NgModule({
   declarations: [
@@ -58,7 +61,8 @@ import { DocumentService } from './shared/_services/document.service';
     MatPaginatorModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule
+    MatSelectModule,
+    ToastrModule.forRoot()
   ],
   providers: [{ provide: APP_BASE_HREF, useValue: '/' },
   AuthGuard,
@@ -67,6 +71,9 @@ import { DocumentService } from './shared/_services/document.service';
   CodesService,
   UploadFilesService,
   DocumentService,
+  IssuerService,
+  NotificationService,
+
   AppService
   // ,
   // {
