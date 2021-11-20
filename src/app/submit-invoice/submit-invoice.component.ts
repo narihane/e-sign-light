@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { CodeSearch } from '../shared/_models/codes.models';
 import { Invoice, Item, ItemNames } from '../shared/_models/invoice.model';
 import { AppService } from '../shared/_services/app.service';
+import { CodesService } from '../shared/_services/codes.service';
 
 @Component({
   selector: 'app-submit-invoice',
@@ -11,16 +13,20 @@ import { AppService } from '../shared/_services/app.service';
 export class SubmitInvoiceComponent implements OnInit {
  //Main form group
  invoiceForm: FormGroup;
- categories = ['Gold Pendant', 'Gold necklace'];
+ categories:CodeSearch[] = [];
  isSubmitted = false;
  totalPrice = 0;
  invoiceValue!: Invoice;
  hasLoaded:boolean=false;
+ receiverType:string='';
 
  //Display names and call_values for Items
  itemsDisplayNames: ItemNames[] = new Item().itemArr;
 
  fixedForm = new FormGroup({
+   receiverType: new FormControl('', [
+    Validators.required
+  ]),
    date: new FormControl('', [
      Validators.required
    ]),
@@ -55,16 +61,13 @@ export class SubmitInvoiceComponent implements OnInit {
  });
 
  itemForm = new FormGroup({
-   model: new FormControl('', [
+   desc: new FormControl('', [
      Validators.required
    ]),
-   serial_number: new FormControl('', [
+   currency: new FormControl('', [
      Validators.required
    ]),
    quantity: new FormControl('', [
-     Validators.required
-   ]),
-   karat: new FormControl('', [
      Validators.required
    ]),
    category: new FormControl('', [
@@ -75,10 +78,14 @@ export class SubmitInvoiceComponent implements OnInit {
    ]),
    price: new FormControl('', [
      Validators.required
+   ]),
+   discount: new FormControl('', [
+     Validators.required
    ])
  });
 
- constructor(private fb: FormBuilder, private appService:AppService) {
+ constructor(private fb: FormBuilder, private appService:AppService,
+  private codeService:CodesService) {
    this.invoiceForm = this.fb.group({
      items: this.fb.array([this.itemForm]),
      fixed: this.fixedForm
@@ -86,6 +93,9 @@ export class SubmitInvoiceComponent implements OnInit {
  }
 
  ngOnInit(): void {
+   this.codeService.getCodes(1,10).subscribe((data)=>{
+     this.categories=data;
+   })
  }
 
  items(): FormArray {
@@ -94,32 +104,40 @@ export class SubmitInvoiceComponent implements OnInit {
 
  newInvoice(): FormGroup {
    return new FormGroup({
-     model: new FormControl('', [
-       Validators.required
-     ]),
-     serial_number: new FormControl('', [
-       Validators.required
-     ]),
-     quantity: new FormControl('', [
-       Validators.required
-     ]),
-     karat: new FormControl('', [
-       Validators.required
-     ]),
-     category: new FormControl('', [
-       Validators.required
-     ]),
-     weight: new FormControl('', [
-       Validators.required
-     ]),
-     price: new FormControl('', [
-       Validators.required
-     ])
-   });
+    desc: new FormControl('', [
+      Validators.required
+    ]),
+    currency: new FormControl('', [
+      Validators.required
+    ]),
+    quantity: new FormControl('', [
+      Validators.required
+    ]),
+    category: new FormControl('', [
+      Validators.required
+    ]),
+    weight: new FormControl('', [
+      Validators.required
+    ]),
+    price: new FormControl('', [
+      Validators.required
+    ]),
+    discount: new FormControl('', [
+      Validators.required
+    ])
+  });
  }
 
  addItem() {
    this.items().push(this.newInvoice());
+   var arr = this.invoiceForm.get("items") as FormArray;
+   arr.value.forEach((e: any) => {
+     if(e["price"]>0)
+      this.totalPrice += parseInt(e["price"]);
+    console.log(this.totalPrice)
+  });
+
+  this.invoiceForm.get("fixed")?.get("totalPrice")?.setValue(this.totalPrice);
  }
 
  deleteItem(i: number) {
@@ -130,14 +148,8 @@ export class SubmitInvoiceComponent implements OnInit {
    this.isSubmitted = true;
 
    this.invoiceForm.get("fixed")?.get("date")?.setValue(this.appService.getDateTime());
-   var arr = this.invoiceForm.get("items") as FormArray;
-   console.log(arr.value)
 
-   arr.value.forEach((e: any) => {
-     this.totalPrice += parseInt(e["price"]);
-   });
 
-   this.invoiceForm.get("fixed")?.get("totalPrice")?.setValue(this.totalPrice);
    if (this.invoiceForm.value && this.invoiceForm.get("fixed")?.get("client_id")?.value === ''
      && parseInt(this.invoiceForm.get("fixed")?.get("totalPrice")?.value) >= 50000) {
      console.log('Invalid')

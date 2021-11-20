@@ -1,0 +1,78 @@
+
+        <ul class="nav nav-pills nav-pills-primary nav-pills-icons">
+          <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#file" role="tablist" aria-expanded="true">
+              File Upload
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#manual" role="tablist" aria-expanded="false">
+              Manual
+            </a>
+          </li>
+        </ul>
+
+        <div class="tab-content tab-space">
+          <div class="tab-pane active" id="file" aria-expanded="true">
+            <div class="row">
+              <div class="col-8">
+                <label class="btn btn-default p-0">
+                  <input type="file" (change)="selectFile($event)" multiple>
+                </label>
+              </div>
+
+              <div class="col-4">
+                <button class="btn btn-success btn-sm" [disabled]="!selectedFiles" (click)="upload()">
+                  Upload
+                </button>
+              </div>
+            </div>
+
+            <div *ngIf="currentFile" class="progress my-3">
+              <div class="progress-bar progress-bar-info progress-bar-striped" role="progressbar"
+                attr.aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100"
+                [ngStyle]="{ width: progress + '%' }">
+                {{ progress }}%
+              </div>
+            </div>
+
+            <div *ngIf="message" class="alert alert-secondary" role="alert">{{ message }}</div>
+
+            <div class="card mt-3">
+              <div class="card-header">List of Files</div>
+              <ul class="list-group list-group-flush" *ngFor="let file of fileInfos | async">
+                <li class="list-group-item">
+                  <a href="{{ file.url }}">{{ file.name }}</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="tab-pane" id="manual" aria-expanded="false">
+            <form class="form" [formGroup]="codesForm" (ngSubmit)="manualCodesSubmit()">
+              <div formArrayName="codes">
+                <div *ngFor="let attribute of codes().controls; let i=index" [formGroupName]="i">
+                  <div class="row">
+                    <div class="col-lg-5 col-md-6 offset-lg-0 offset-md-3">
+                      <div class="input-group">
+                        <input type="text" placeholder="Internal Code" class="form-control" id="internal_code"
+                          name="internal_code" required formControlName="internal_code">
+                      </div>
+                    </div>
+                    <div class="col-lg-5 col-md-6 offset-lg-0 offset-md-3">
+                      <div class="input-group">
+                        <input type="text" placeholder="Portal Code" class="form-control" id="portal_code"
+                          name="portal_code" required formControlName="portal_code">
+                      </div>
+                    </div>
+                    <div class="col-lg-1 col-md-2 offset-lg-0 offset-md-3">
+                      <button class="btn btn-link btn-fab btn-icon btn-round" (click)="addItem()">
+                        <i class="fas fa-plus" style="color:black"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button href="javascript:void(0)" type="submit" class="btn btn-primary btn-round btn-lg">Submit</button>
+            </form>
+          </div>
+        </div>

@@ -1,0 +1,85 @@
+<div class="card card-register">
+  <h1 class="text-center">Issuer details</h1><br>
+  <form class="form" [formGroup]="settingsForm" (ngSubmit)="settingsSubmit()">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-lg-5 col-md-6 offset-lg-0 offset-md-3">
+          <input type="text" placeholder="Issuer name" class="form-control" id="name" name="name" required
+            formControlName="name">
+        </div>
+        <div class="col-lg-5 col-md-6 offset-lg-0 offset-md-3">
+          <mat-label>Issuer Type</mat-label>
+          <mat-select formControlName="type">
+            <mat-optgroup label="Business">
+              <mat-option>
+                B
+              </mat-option>
+            </mat-optgroup>
+            <mat-optgroup label="Person">
+              <mat-option>
+                P
+              </mat-option>
+            </mat-optgroup>
+          </mat-select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-5 col-md-6 offset-lg-0 offset-md-3">
+          <input type="text" placeholder="Registeration number" class="form-control" id="reg_num" name="reg_num"
+            required formControlName="reg_num">
+        </div>
+        <div class="col-lg-5 col-md-6 offset-lg-0 offset-md-3">
+          <input type="number" placeholder="Price Threshold" class="form-control" id="price_threshold"
+            name="price_threshold" required formControlName="price_threshold">
+        </div>
+      </div>
+      <br><br>
+      <!-- Branches -->
+      <div formArrayName="branches">
+        <div class="row">
+          <div class="col-lg-10 col-md-10 offset-lg-0 offset-md-3 text-left">
+            <span style="text-align: left;">Add Branch</span>
+          </div>
+          <div class="col-lg-1 col-md-2 offset-lg-0 offset-md-3">
+            <button class="btn btn-link btn-fab btn-icon btn-round" (click)="addItem()">
+              <i class="fas fa-plus" style="color:black"></i>
+            </button>
+          </div>
+        </div>
+        <div *ngFor="let attribute of branches().controls; let i=index" [formGroupName]="i">
+          <div class="row">
+            <div class="col-lg-5 col-md-6 offset-lg-0 offset-md-3">
+              <input type="text" placeholder="Branch Code" class="form-control" id="branchCode" name="branchCode"
+                required formControlName="branchCode">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-1 col-md-1 offset-lg-0 offset-md-3">
+              <input type="text" placeholder="BuildingNum" class="form-control" id="branchBuildingNum"
+                name="branchBuildingNum" required formControlName="branchBuildingNum">
+            </div>
+            <div class="col-lg-5 col-md-6 offset-lg-0 offset-md-3">
+              <input type="text" placeholder="Branch Street" class="form-control" id="branchStreet" name="branchStreet"
+                required formControlName="branchStreet">
+            </div>
+            <div class="col-lg-2 col-md-3 offset-lg-0 offset-md-3">
+              <input type="text" placeholder="City" class="form-control" id="branchCity" name="branchCity"
+                required formControlName="branchCity">
+            </div>
+            <div class="col-lg-2 col-md-2 offset-lg-0 offset-md-3">
+              <input type="text" placeholder="Governate" class="form-control" id="branchGovernate"
+                name="branchGovernate" required formControlName="branchGovernate">
+            </div>
+            <div class="col-lg-2 col-md-2 offset-lg-0 offset-md-3">
+              <input type="text" placeholder="Country" class="form-control" id="branchCountry"
+                name="branchCountry" required formControlName="branchCountry">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button href="javascript:void(0)" type="submit" style="align-items: center;"
+      class="btn btn-primary btn-round btn-lg">Submit</button>
+    </div>
+  </form>
+</div>

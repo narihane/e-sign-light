@@ -1,29 +1,29 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { User } from '../_models/user.model';
+import { User, UserData } from '../_models/user.model';
 
 @Injectable()
 export class UserService {
   constructor(private http: HttpClient) { }
 
   getAll() {
-    return this.http.get<User[]>('/api/users');
+    return this.http.get<UserData[]>('/api/users/all');
   }
 
-  getByEmail(email: string) {
-    return this.http.get('/api/users/' + email);
+  getById(id: number) {
+    return this.http.get<UserData>(`/api/users/${id}`);
   }
 
-  create(user: User) {
-    return this.http.post('/api/users', user);
+  approveUser(id: number) {
+    // return this.http.put<string>(`/api/users/approve/${id}`);
   }
 
-  update(user: User) {
-    return this.http.put('/api/users/' + user.email, user);
+  rejectUser(id: number) {
+    // return this.http.put<string>(`/api/users/reject/${id}`);
   }
 
   delete(id: number) {
-    return this.http.delete('/api/users/' + id);
+    return this.http.delete(`/api/users/delete/${id}`);
   }
 }
