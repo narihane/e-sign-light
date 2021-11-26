@@ -27,13 +27,19 @@ import { AdminSettingsComponent } from './admin-settings/admin-settings.componen
 import { CodeMappingComponent } from './code-mapping/code-mapping.component';
 import { RegisteredUsersComponent } from './registered-users/registered-users.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { GetInvoicesComponent } from './get-invoices/get-invoices.component';
+import { SubmittedDocumentsComponent } from './submitted-documents/submitted-documents.component';
 import { LoginComponent } from './login/login.component';
 import { CodesService } from './shared/_services/codes.service';
 import { DocumentService } from './shared/_services/document.service';
 import { IssuerService } from './shared/_services/issuer.service';
 import { NotificationService } from './shared/_services/notifications.service';
 import { ToastrModule, ToastrService } from 'ngx-toastr';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { ReceivedDocumentsComponent } from './received-documents/received-documents.component';
+import { PendingInvoicesComponent } from './pending-invoices/pending-invoices.component';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { InvoiceService } from './shared/_services/invoice.service';
 
 @NgModule({
   declarations: [
@@ -44,8 +50,11 @@ import { ToastrModule, ToastrService } from 'ngx-toastr';
     AdminSettingsComponent,
     CodeMappingComponent,
     RegisteredUsersComponent,
-    GetInvoicesComponent,
-    LoginComponent
+    SubmittedDocumentsComponent,
+    LoginComponent,
+    DashboardComponent,
+    ReceivedDocumentsComponent,
+    PendingInvoicesComponent
   ],
   imports: [
     BrowserModule,
@@ -57,6 +66,8 @@ import { ToastrModule, ToastrService } from 'ngx-toastr';
     BrowserAnimationsModule,
     MatCheckboxModule,
     MatRadioModule,
+    MatDialogModule,
+    MatButtonModule,
     MatTableModule,
     MatPaginatorModule,
     MatFormFieldModule,
@@ -73,7 +84,7 @@ import { ToastrModule, ToastrService } from 'ngx-toastr';
   DocumentService,
   IssuerService,
   NotificationService,
-
+  InvoiceService,
   AppService
   // ,
   // {

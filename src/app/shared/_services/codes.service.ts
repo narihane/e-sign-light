@@ -17,4 +17,15 @@ export class CodesService {
         return data.result;
       }));
   }
+
+  searchCodes(pageNumber: number, pageSize: number, searchName:string) {
+    const token = localStorage.getItem('currentUser');
+
+    return this.http.get<codesResult>(environment.backendUrl + `/api/Codes/search/usages?pageNumber=${pageNumber}&pageSize=${pageSize}
+    &codeName=${searchName}`,
+      { headers: new HttpHeaders().set('Authorization','Bearer '+token!)}).pipe(map((data: codesResult) => {
+        console.log(data.result)
+        return data.result;
+      }));
+  }
 }
