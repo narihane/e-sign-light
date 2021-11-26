@@ -13,16 +13,17 @@
             <div class="card">
                 <form class="form box" [formGroup]="loginForm" (ngSubmit)="onLogin()">
                     <h1>Login</h1>
-                    <p class="text-muted"> Please enter your login and password!</p>
+                    <p class="text-muted"> Please enter your email and password!</p>
                     <input type="text" placeholder="Email" class="form-control" id="email" name="email" required formControlName="email">
-                    <input type="text" class="form-control" placeholder="Password" class="form-control" id="password" name="password" required formControlName="password">
-                    <a class="forgot text-muted" href="#">Forgot password?</a>
+                    <input type="password" class="form-control" placeholder="Password" class="form-control" id="password" name="password" required formControlName="password">
+                    <!-- TODO: FORGOT PASSWORD HANDLING! -->
+                    <!-- <a class="forgot text-muted" href="#">Forgot password?</a> -->
                     <input type="submit" name="" value="Login">
                     <p class="text-muted">
                         Don't have an account yet?
                         <a href="javascript:void(0)" (click)="open(content)"> Register here</a>.
                     </p>
-                    <div class="col-md-12">
+                    <!-- <div class="col-md-12">
                         <ul class="social-network social-circle">
                             <li><a href="#" class="icoFacebook" title="Facebook"><i class="fab
                     fa-facebook-f"></i></a></li>
@@ -31,7 +32,7 @@
                             <li><a href="#" class="icoGoogle" title="Google +"><i class="fab
                     fa-google-plus"></i></a></li>
                         </ul>
-                    </div>
+                    </div> -->
                 </form>
             </div>
         </div>
