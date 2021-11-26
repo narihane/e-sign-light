@@ -60,7 +60,7 @@ export class LoginComponent implements OnInit {
       return;
     }
     // API for login access token
-    this.router.navigate(['home'], {
+    this.router.navigate(['/'], {
       skipLocationChange: true
     });
     this.loginForm.reset();

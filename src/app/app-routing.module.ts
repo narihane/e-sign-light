@@ -11,9 +11,9 @@ import { SidebarComponent } from './sidebar/sidebar.component';
 import { SubmitInvoiceComponent } from './submit-invoice/submit-invoice.component';
 
 const routes: Routes = [
-  { path: '', component: LoginComponent },
+  { path: 'login', component: LoginComponent },
   {
-    path: 'home', component: SidebarComponent, canActivate: [AuthGuard],
+    path: '', component: SidebarComponent, canActivate: [AuthGuard],
     children:
       [{ path: '', redirectTo: 'get-invoices', pathMatch: 'full', },
       { path: 'submit-invoice', component: SubmitInvoiceComponent },

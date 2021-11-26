@@ -9,11 +9,11 @@ export interface RouteInfo {
 }
 
 export const ROUTES: RouteInfo[] = [
-  { path: '/home/submit-invoice', title: 'Submit Invoice', icon: 'nc-bank', class: '' },
-  { path: '/home/get-invoices', title: 'Get Documents', icon: 'nc-diamond', class: '' },
-  { path: '/home/pending-invoices',         title: 'Pending Invoices',             icon:'nc-diamond',    class: '' },
-  { path: '/home/admin-settings', title: 'Admin Settings', icon: 'nc-single-02', class: '' },
-  { path: '/home/codemap', title: 'Code Mapping', icon: 'nc-tile-56', class: '' },
+  { path: '/submit-invoice', title: 'Submit Invoice', icon: 'nc-bank', class: '' },
+  { path: '/get-invoices', title: 'Get Documents', icon: 'nc-diamond', class: '' },
+  { path: '/pending-invoices',         title: 'Pending Invoices',             icon:'nc-diamond',    class: '' },
+  { path: '/admin-settings', title: 'Admin Settings', icon: 'nc-single-02', class: '' },
+  { path: '/codemap', title: 'Code Mapping', icon: 'nc-tile-56', class: '' },
 
 ];
 
