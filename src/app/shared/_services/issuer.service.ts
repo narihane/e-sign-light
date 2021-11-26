@@ -12,7 +12,9 @@ export class IssuerService {
   constructor(private http: HttpClient, private notificationService: NotificationService) { }
 
   getIssuer() {
-    return this.http.get('/api/taxpayer/get');
+    const token = localStorage.getItem('currentUser');
+    return this.http.get<Issuer[]>(environment.backendUrl +'/api/taxpayer/get',
+    { headers: new HttpHeaders().set('Authorization','Bearer '+token!)});
   }
 
   createIssuer(issuer: Issuer) {

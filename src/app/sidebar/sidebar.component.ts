@@ -9,12 +9,13 @@ export interface RouteInfo {
 }
 
 export const ROUTES: RouteInfo[] = [
-  { path: '/home/submit-invoice', title: 'Submit Invoice', icon: 'nc-bank', class: '' },
-  { path: '/home/get-invoices', title: 'Get Documents', icon: 'nc-diamond', class: '' },
-  { path: '/home/pending-invoices',         title: 'Pending Invoices',             icon:'nc-diamond',    class: '' },
-  { path: '/home/admin-settings', title: 'Admin Settings', icon: 'nc-single-02', class: '' },
+  { path: '/home/dashboard', title: 'Dashboard', icon: 'nc-bank', class: '' },
+  { path: '/home/add-invoice', title: 'Add Invoice', icon: 'nc-bank', class: '' },
+  { path: '/home/pending-invoices', title: 'Pending Invoices', icon:'nc-diamond',class: '' },
+  { path: '/home/submitted-documents', title: 'Submitted Documents', icon: 'nc-diamond', class: '' },
+  { path: '/home/received-documents', title: 'Received Documents', icon: 'nc-diamond', class: '' },
   { path: '/home/codemap', title: 'Code Mapping', icon: 'nc-tile-56', class: '' },
-
+  { path: '/home/admin-settings', title: 'Admin Settings', icon: 'nc-single-02', class: '' },
 ];
 
 @Component({

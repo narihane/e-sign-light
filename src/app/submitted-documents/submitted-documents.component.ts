@@ -51,11 +51,11 @@ const NAMES: string[] = [
 ];
 
 @Component({
-  selector: 'app-get-invoices',
-  templateUrl: './get-invoices.component.html',
-  styleUrls: ['./get-invoices.component.css']
+  selector: 'app-submitted-documents',
+  templateUrl: './submitted-documents.component.html',
+  styleUrls: ['./submitted-documents.component.css']
 })
-export class GetInvoicesComponent implements OnInit {
+export class SubmittedDocumentsComponent implements OnInit {
   displayedColumns: string[] = ['uuid', 'dateTimeIssued', 'status', 'total'];
   dataSource: MatTableDataSource<DocumentResult>;
 
@@ -111,20 +111,4 @@ export class GetInvoicesComponent implements OnInit {
       this.dataSource.paginator.firstPage();
     }
   }
-}
-
-/** Builds and returns a new User. */
-function createNewUser(id: number): UserData {
-  const name =
-    NAMES[Math.round(Math.random() * (NAMES.length - 1))] +
-    ' ' +
-    NAMES[Math.round(Math.random() * (NAMES.length - 1))].charAt(0) +
-    '.';
-
-  return {
-    id: id.toString(),
-    name: name,
-    progress: Math.round(Math.random() * 100).toString(),
-    fruit: FRUITS[Math.round(Math.random() * (FRUITS.length - 1))],
-  };
 }
