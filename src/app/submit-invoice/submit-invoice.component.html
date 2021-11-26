@@ -86,8 +86,140 @@
             </div>
           </div>
         </ng-container>
+        <ng-container *ngIf="receiverType === 'business'">
+          <div class="row">
+            <div class="col-lg-5 col-md-6 offset-lg-0 offset-md-3">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">
+                    <i class="fas fa-user"></i>
+                  </div>
+                </div>
+                <input type="text" placeholder="Client Name" class="form-control" id="name" name="name" required
+                  formControlName="client_name">
+              </div>
+            </div>
+            <div class="col-lg-5 col-md-6 offset-lg-0 offset-md-3">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">
+                    <i class="fas fa-mobile-alt"></i>
+                  </div>
+                </div>
+                <input type="text" placeholder="Client Phone Number" class="form-control" id="number" name="number"
+                  required formControlName="client_phone">
+              </div>
+            </div>
+            <div class="col-lg-5 col-md-6 offset-lg-0 offset-md-3">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">
+                    <i class="far fa-envelope"></i>
+                  </div>
+                </div>
+                <input type="text" placeholder="Client Email" class="form-control" id="email" name="email" required
+                  formControlName="client_email">
+              </div>
+            </div>
+            <div class="col-lg-5 col-md-6 offset-lg-0 offset-md-3">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">
+                    <i class="far fa-address-card"></i>
+                  </div>
+                </div>
+                <input type="text" placeholder="Client ID" class="form-control" id="id" name="id"
+                  formControlName="client_id" required>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-5 col-md-6 offset-lg-0 offset-md-3">
+              <!-- <div class="input-group"> -->
+              <label for="exampleFormControlSelect3">Payment Type</label>
+              <select class="form-control" formControlName="payment_type" id="exampleFormControlSelect3">
+                <option style="color: black;">Cash</option>
+                <option style="color: black;">Visa</option>
+              </select>
+              <!-- </div> -->
+            </div>
+            <div class="col-lg-5 col-md-6 offset-lg-0 offset-md-3">
+              <label for="branchDD">Branch</label>
+              <select class="form-control" formControlName="branch" id="branchDD">
+                <option style="color: black;">Korba</option>
+                <option style="color: black;">Tagamoaa</option>
+              </select>
+            </div>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="receiverType === 'foreigner'">
+          <div class="row">
+            <div class="col-lg-5 col-md-6 offset-lg-0 offset-md-3">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">
+                    <i class="fas fa-user"></i>
+                  </div>
+                </div>
+                <input type="text" placeholder="Client Name" class="form-control" id="name" name="name" required
+                  formControlName="client_name">
+              </div>
+            </div>
+            <div class="col-lg-5 col-md-6 offset-lg-0 offset-md-3">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">
+                    <i class="fas fa-mobile-alt"></i>
+                  </div>
+                </div>
+                <input type="text" placeholder="Client Phone Number" class="form-control" id="number" name="number"
+                  required formControlName="client_phone">
+              </div>
+            </div>
+            <div class="col-lg-5 col-md-6 offset-lg-0 offset-md-3">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">
+                    <i class="far fa-envelope"></i>
+                  </div>
+                </div>
+                <input type="text" placeholder="Client Email" class="form-control" id="email" name="email" required
+                  formControlName="client_email">
+              </div>
+            </div>
+            <div class="col-lg-5 col-md-6 offset-lg-0 offset-md-3">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">
+                    <i class="far fa-address-card"></i>
+                  </div>
+                </div>
+                <input type="text" placeholder="Client ID" class="form-control" id="id" name="id"
+                  formControlName="client_id" required>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-5 col-md-6 offset-lg-0 offset-md-3">
+              <!-- <div class="input-group"> -->
+              <label for="exampleFormControlSelect3">Payment Type</label>
+              <select class="form-control" formControlName="payment_type" id="exampleFormControlSelect3">
+                <option style="color: black;">Cash</option>
+                <option style="color: black;">Visa</option>
+              </select>
+              <!-- </div> -->
+            </div>
+            <div class="col-lg-5 col-md-6 offset-lg-0 offset-md-3">
+              <label for="branchDD">Branch</label>
+              <select class="form-control" formControlName="branch" id="branchDD">
+                <option style="color: black;">Korba</option>
+                <option style="color: black;">Tagamoaa</option>
+              </select>
+            </div>
+          </div>
+        </ng-container>
       </div>
-      <div formArrayName="items">
+      <div formArrayName="items" *ngIf="receiverType">
         <div *ngFor="let attribute of items().controls; let i=index" [formGroupName]="i">
           <div class="row">
             <div class="col-lg-10 col-md-10 offset-lg-0 offset-md-3"></div>
@@ -196,7 +328,7 @@
       <div class="card-footer">
         <div class="row text-right">
           <!-- TODO:ADD CURRENCY -->
-          <h4>Net Total= {{totalPrice}}</h4>
+          <p>Net Total= {{totalPrice | currency:'EGP'}}</p>
         </div>
         <button href="javascript:void(0)" [useExistingCss]="true" type="submit" printSectionId="myFormPrint" ngxPrint
           class="btn btn-primary btn-round btn-lg" printTitle="">Submit</button>

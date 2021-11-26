@@ -4,6 +4,7 @@ import { AdminSettingsComponent } from './admin-settings/admin-settings.componen
 import { CodeMappingComponent } from './code-mapping/code-mapping.component';
 import { GetInvoicesComponent } from './get-invoices/get-invoices.component';
 import { LoginComponent } from './login/login.component';
+import { PendingInvoicesComponent } from './pending-invoices/pending-invoices.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { SubmitInvoiceComponent } from './submit-invoice/submit-invoice.component';
 
@@ -14,6 +15,7 @@ const routes: Routes = [
     children:
       [{ path: '', redirectTo: 'get-invoices', pathMatch: 'full', },
       { path: 'submit-invoice', component: SubmitInvoiceComponent },
+      { path: 'pending-invoices', component: PendingInvoicesComponent },
       { path: 'admin-settings', component: AdminSettingsComponent },
       { path: 'codemap', component: CodeMappingComponent },
       { path: 'get-invoices', component: GetInvoicesComponent }, //canActivate: [AdminGuard]},

@@ -16,9 +16,9 @@ export interface Address {
 }
 
 export interface Receiver {
-    address: Address;
-    type: string;
-    id: string;
+    address?: Address;
+    type?: string;
+    id?: string;
     name: string;
 }
 
@@ -64,13 +64,13 @@ export interface InvoiceLine {
     itemCode: string;
     unitType: string;
     quantity: number;
-    internalCode: string;
-    valueDifference: number;
-    totalTaxableFees: number;
+    internalCode?: string;
+    valueDifference?: number;
+    totalTaxableFees?: number;
     itemsDiscount: number;
     unitValue: UnitValue;
-    discount: Discount;
-    taxableItems: TaxableItem[];
+    discount?: Discount;
+    taxableItems?: TaxableItem[];
 }
 
 export interface Document {
@@ -80,19 +80,19 @@ export interface Document {
     documentTypeVersion: string;
     dateTimeIssued: Date;
     taxpayerActivityCode: string;
-    internalID: string;
-    purchaseOrderReference: string;
-    purchaseOrderDescription: string;
-    salesOrderReference: string;
-    salesOrderDescription: string;
-    proformaInvoiceNumber: string;
-    payment: Payment;
-    delivery: Delivery;
+    internalID?: string;
+    purchaseOrderReference?: string;
+    purchaseOrderDescription?: string;
+    salesOrderReference?: string;
+    salesOrderDescription?: string;
+    proformaInvoiceNumber?: string;
+    payment?: Payment;
+    delivery?: Delivery;
     invoiceLines: InvoiceLine[];
-    extraDiscountAmount: number;
+    extraDiscountAmount?: number;
 }
 
-export interface Invoice {
+export interface InvoiceDocument {
     documents: Document[];
 }
 

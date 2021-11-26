@@ -81,7 +81,6 @@ export class AdminSettingsComponent implements OnInit {
       addresses: this.settingsForm.get('branches')?.value,
     }
     this.issuerService.createIssuer(issuer).subscribe((data)=>{
-
     });
   }
 
