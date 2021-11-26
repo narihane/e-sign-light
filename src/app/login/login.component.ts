@@ -27,28 +27,6 @@ export class LoginComponent implements OnInit {
     ])
   });
 
-
-  checkPasswords: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
-    let pass = group.get('password')?.value;
-    let confirmPass = group.get('confirmPassword')?.value
-    return pass === confirmPass ? null : { notSame: true }
-  }
-
-  registerForm = new FormGroup({
-    name: new FormControl('', [
-      Validators.required
-    ]),
-    email: new FormControl('', [
-      Validators.required
-    ]),
-    password: new FormControl('', [
-      Validators.required
-    ]),
-    confirmPassword: new FormControl('', [
-      Validators.required
-    ]),
-  }, { validators: this.checkPasswords });
-
   constructor(private modalService: NgbModal, private route: ActivatedRoute,
     private router: Router, private formBuilder: FormBuilder,
     private authenticationService: AuthenticationService,
@@ -57,21 +35,16 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     // reset login status
-    // this.authenticationService.logout();
+    this.authenticationService.logout();
 
     // get return url from route parameters or default to '/'
-    // this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
   }
 
   //Login
   get email() { return this.loginForm.get('email')?.value; }
   get password() { return this.loginForm.get('password')?.value; }
 
-  //Register
-  get name() { return this.registerForm.get('name'); }
-  get emailReg() { return this.registerForm.get('email'); }
-  get passReg() { return this.registerForm.get('password'); }
-  get confirmPass() { return this.registerForm.get('confirmPassword'); }
 
 
   onLogin(): void {
@@ -109,22 +82,6 @@ export class LoginComponent implements OnInit {
           this.loading = false;
         });
   }*/
-
-  onAdminLogin(): void {
-    this.router.navigate(['adminMain'], {
-      queryParams:
-        { email: this.email, password: this.password }, skipLocationChange: true
-    });
-    this.loginForm.reset();
-  }
-
-  onRegSubmit(): void {
-    // Process checkout data here
-    console.log('Register', this.registerForm.value);
-    // API post for registering users
-    this.modalReference.close();
-    this.registerForm.reset();
-  }
 
   open(content: any) {
     this.modalReference = this.modalService.open(content);

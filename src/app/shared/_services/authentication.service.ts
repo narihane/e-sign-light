@@ -29,31 +29,12 @@ export class AuthenticationService {
   registerAdmin(user: User) {
     // Admin = 0
     user.userRole = 0;
-    return this.http.post<any>('/register', { user }).pipe(
-      map((user: any) => {
-        // login successful if there's a jwt token in the response
-        if (user && user.token) {
-          // store user details and jwt token in local storage to keep user logged in between page refreshes
-          localStorage.setItem('currentUser', JSON.stringify(user));
-        }
-
-        return user;
-      }));
+    return this.http.post<any>('/register', { user });
   }
 
   registerUser(user: User) {
     // User = 1
-    user.userRole = 1;
-    return this.http.post<any>('/register', { user }).pipe(
-      map((user: any) => {
-        // login successful if there's a jwt token in the response
-        if (user && user.token) {
-          // store user details and jwt token in local storage to keep user logged in between page refreshes
-          localStorage.setItem('currentUser', JSON.stringify(user));
-        }
-
-        return user;
-      }));
+    return this.http.post<any>('/register', { user });
   }
 
   logout() {

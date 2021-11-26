@@ -5,13 +5,14 @@ import { CodeMappingComponent } from './code-mapping/code-mapping.component';
 import { GetInvoicesComponent } from './get-invoices/get-invoices.component';
 import { LoginComponent } from './login/login.component';
 import { PendingInvoicesComponent } from './pending-invoices/pending-invoices.component';
+import { AuthGuard } from './shared/_guards/authGuard';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { SubmitInvoiceComponent } from './submit-invoice/submit-invoice.component';
 
 const routes: Routes = [
   { path: '', component: LoginComponent },
   {
-    path: 'home', component: SidebarComponent, //canActivate: [AuthorizeGuard],
+    path: 'home', component: SidebarComponent, canActivate: [AuthGuard],
     children:
       [{ path: '', redirectTo: 'get-invoices', pathMatch: 'full', },
       { path: 'submit-invoice', component: SubmitInvoiceComponent },
