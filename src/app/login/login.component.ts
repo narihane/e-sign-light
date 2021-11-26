@@ -31,7 +31,12 @@ export class LoginComponent implements OnInit {
     private router: Router, private formBuilder: FormBuilder,
     private authenticationService: AuthenticationService,
     // private userService: UserService
-    ) { }
+  ) {
+    // redirect to home if already logged in
+    if (this.authenticationService.currentUserValue) {
+      this.router.navigate(['/']);
+    }
+  }
 
   ngOnInit(): void {
     // reset login status
@@ -48,9 +53,13 @@ export class LoginComponent implements OnInit {
 
 
   onLogin(): void {
-    this.authenticationService.login(this.email,this.password).subscribe((data) => console.log(data));
+    this.authenticationService.login(this.email, this.password).subscribe((data) => console.log(data));
+    // stop here if form is invalid
+    if (this.loginForm.invalid) {
+      //TODO:HANDLE ERROR OF INVALID LOGIN
+      return;
+    }
     // API for login access token
-
     this.router.navigate(['home'], {
       skipLocationChange: true
     });

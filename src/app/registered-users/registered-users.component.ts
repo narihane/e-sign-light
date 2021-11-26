@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { MyErrorStateMatcher } from '../login/login.component';
-import { User } from '../shared/_models/user.model';
+import { RegisterUser } from '../shared/_models/user.model';
 import { AuthenticationService } from '../shared/_services/authentication.service';
 
 @Component({
@@ -59,7 +59,7 @@ export class RegisteredUsersComponent implements OnInit {
     // Process checkout data here
     console.log('Register', this.registerForm.value);
     // API post for registering users
-    const reg_user:User={
+    const reg_user:RegisterUser={
       userName: this.user_name,
       firstName: this.first_name,
       lastName:this.last_name,

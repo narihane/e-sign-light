@@ -39,6 +39,7 @@ import { ToastrModule, ToastrService } from 'ngx-toastr';
 import { InvoiceService } from './shared/_services/invoice.service';
 import { PendingInvoicesComponent } from './pending-invoices/pending-invoices.component';
 import { DialogComponent } from './shared/dialog/dialog.component';
+import { ErrorInterceptor } from './shared/_helpers/error.interceptor';
 
 @NgModule({
   declarations: [
@@ -83,14 +84,9 @@ import { DialogComponent } from './shared/dialog/dialog.component';
   IssuerService,
   InvoiceService,
   NotificationService,
-
-  AppService
-  // ,
-  // {
-  //     provide: HTTP_INTERCEPTORS,
-  //     useClass: JwtInterceptor,
-  //     multi: true
-  // }
+  AppService,
+  { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+  { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
 ],
   bootstrap: [AppComponent]
 })
