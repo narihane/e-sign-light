@@ -41,7 +41,8 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { InvoiceService } from './shared/_services/invoice.service';
 import { MatCurrencyFormatModule } from 'mat-currency-format';
-
+import { PercentageMaskDirective } from './shared/_directives/percentage-mask.directive';
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 @NgModule({
   declarations: [
     AppComponent,
@@ -56,8 +57,9 @@ import { MatCurrencyFormatModule } from 'mat-currency-format';
     DashboardComponent,
     ReceivedDocumentsComponent,
     PendingInvoicesComponent,
+    PercentageMaskDirective,
   ],
-  exports: [MatInputModule, MatFormFieldModule],
+  exports: [MatInputModule, MatFormFieldModule, PercentageMaskDirective],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -69,6 +71,7 @@ import { MatCurrencyFormatModule } from 'mat-currency-format';
     MatCheckboxModule,
     MatRadioModule,
     MatDialogModule,
+    NgxMatSelectSearchModule,
     MatCurrencyFormatModule,
     MatButtonModule,
     MatTableModule,

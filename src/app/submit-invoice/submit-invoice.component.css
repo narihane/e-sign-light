@@ -37,3 +37,8 @@
   max-width: 120px;
   text-align: center;
 }
+
+.mat-column-actions {
+  max-width: 60px;
+  text-align: center;
+}

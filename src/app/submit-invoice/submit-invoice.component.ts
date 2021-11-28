@@ -17,6 +17,7 @@ import {
 } from '../shared/_models/AE-invoice.model';
 import { CodeSearch } from '../shared/_models/codes.models';
 import { Invoice, Item, ItemNames } from '../shared/_models/invoice.model';
+import { Tax } from '../shared/_models/tax.model';
 import { AppService } from '../shared/_services/app.service';
 import { CodesService } from '../shared/_services/codes.service';
 import { InvoiceService } from '../shared/_services/invoice.service';
@@ -33,6 +34,7 @@ export class SubmitInvoiceComponent implements OnInit {
   categories: CodeSearch[] = [];
   isSubmitted = false;
   totalPrice = 0;
+  totalDiscount = 0;
   invoiceValue!: Invoice;
   hasLoaded: boolean = false;
   receiverType: string = '';
@@ -44,7 +46,8 @@ export class SubmitInvoiceComponent implements OnInit {
     receiverType: new FormControl('', [Validators.required]),
     date: new FormControl('', [Validators.required]),
     branch: new FormControl('', [Validators.required]),
-    totalPrice: new FormControl('', [Validators.required]),
+    totalPrice: new FormControl(0, [Validators.required]),
+    netAmount: new FormControl('', [Validators.required]),
     payment_type: new FormControl('', [Validators.required]),
     client_name: new FormControl('', [Validators.required]),
     client_phone: new FormControl('', [Validators.required]),
@@ -66,6 +69,8 @@ export class SubmitInvoiceComponent implements OnInit {
     'price',
     'discount',
     'description',
+    // 'tax',
+    'netTotal',
   ];
   itemForm = new FormGroup({
     desc: new FormControl('', [Validators.required]),
@@ -75,6 +80,19 @@ export class SubmitInvoiceComponent implements OnInit {
     unitType: new FormControl('', [Validators.required]),
     price: new FormControl('', [Validators.required]),
     discount: new FormControl('', [Validators.required]),
+    tax: new FormControl('', [Validators.required]),
+    netTotal: new FormControl(0, [Validators.required]), //Sales Total - Discount Amount -> Sales Total = Quantity*Amount
+  });
+
+  //Tax Variables
+  totalTax = 0;
+  taxArr = new Tax().final_tax_arr;
+  taxForm: FormGroup;
+  taxItems = new FormGroup({
+    type: new FormControl('', [Validators.required]),
+    subType: new FormControl('', [Validators.required]),
+    rate: new FormControl('', [Validators.required]),
+    amount: new FormControl('', [Validators.required]),
   });
 
   constructor(
@@ -87,6 +105,9 @@ export class SubmitInvoiceComponent implements OnInit {
     this.invoiceForm = this.fb.group({
       items: this.fb.array([this.itemForm]),
       fixed: this.fixedForm,
+    });
+    this.taxForm = this.fb.group({
+      taxes: this.fb.array([this.taxItems]),
     });
     console.log(this.invoiceForm);
     this.dataSource = new MatTableDataSource(this.items().controls);
@@ -107,13 +128,14 @@ export class SubmitInvoiceComponent implements OnInit {
   newInvoice(): FormGroup {
     return new FormGroup({
       desc: new FormControl('', [Validators.required]),
-      currency: new FormControl('', [Validators.required]),
       quantity: new FormControl('', [Validators.required]),
       category: new FormControl('', [Validators.required]),
       weight: new FormControl('', [Validators.required]),
       unitType: new FormControl('', [Validators.required]),
       price: new FormControl('', [Validators.required]),
       discount: new FormControl('', [Validators.required]),
+      tax: new FormControl('', [Validators.required]),
+      netTotal: new FormControl('', [Validators.required]), //Sales Total - Discount Amount -> Sales Total = Quantity*Amount
     });
   }
 
@@ -134,6 +156,15 @@ export class SubmitInvoiceComponent implements OnInit {
   deleteItem(i: number) {
     this.items().removeAt(i);
     this.dataSource = new MatTableDataSource(this.items().controls);
+  }
+
+  //On change of quantity, discount and price -> update net total
+  updateNetTotal(i: number) {
+    const itemFormValue = this.items().value[i];
+    const salesTotal = itemFormValue['quantity'] * itemFormValue['price'];
+    const discount = ((100 - itemFormValue['discount']) / 100) * salesTotal;
+    this.invoiceForm.get(['items', i, 'netTotal'])?.setValue(discount);
+    console.log(this.invoiceForm.get(['items', i, 'netTotal']));
   }
 
   onInvoiceAdd() {
@@ -237,6 +268,53 @@ export class SubmitInvoiceComponent implements OnInit {
             });
           });
         });
+    });
+  }
+
+  // Taxes Section
+  taxes(): FormArray {
+    return this.taxForm.get('taxes') as FormArray;
+  }
+
+  newTax(): FormGroup {
+    return new FormGroup({
+      type: new FormControl('', [Validators.required]),
+      subType: new FormControl('', [Validators.required]),
+      rate: new FormControl('', [Validators.required]),
+      amount: new FormControl('', [Validators.required]),
+    });
+  }
+
+  addTax() {
+    this.taxes().push(this.newTax());
+    this.taxes().value.forEach((e: any) => {
+      //Calculate for T1
+
+      switch (e['type']) {
+        case 'T1':
+          //Amount = (Amount+Net Total + TotalTaxableFees+Value Diff + Taxable item.Amount)*Rate - > Taxable item.Amount == sum of all items in taxable array
+          e['amount']?.setValue(0);
+          // this.invoiceForm.get(['items', i, 'netTotal'])?.setValue(discount);
+          break;
+        case 'T2':
+          // Amount = (Net total + totalTaxableFees + valueDifference + taxableItems.taxType(T3).Amount) * Rate
+          e['amount']?.setValue(0);
+          break;
+        case 'T3':
+          // Fixed Amount = Rate should be zero
+          break;
+        case 'T4':
+          // Amount = taxableItem(T4).Rate * (Net total - discount)
+          break;
+
+        //T5 --> T12 amount = rate * invoiceline.netTotal except:
+
+        case 'T6':
+          // Fixed Amount = Rate should be zero
+
+          break;
+        default:
+      }
     });
   }
 }

@@ -1,5 +1,10 @@
 <div class="card card-register">
-  <form class="form" [formGroup]="invoiceForm" (ngSubmit)="onInvoiceAdd()">
+  <form
+    class="form"
+    [formGroup]="invoiceForm"
+    (ngSubmit)="onInvoiceAdd()"
+    autocomplete="off"
+  >
     <div class="card-body">
       <div formArrayName="fixed">
         <h3>Choose Receiver Type</h3>
@@ -418,11 +423,15 @@
             <!-- Quantity Column -->
             <ng-container matColumnDef="quantity">
               <mat-header-cell *matHeaderCellDef> Quantity </mat-header-cell>
-              <mat-cell *matCellDef="let element" [formGroup]="element">
+              <mat-cell
+                *matCellDef="let element; let i = index"
+                [formGroup]="element"
+              >
                 <select
                   class="form-select"
                   formControlName="quantity"
                   id="exampleFormControlSelect1"
+                  (change)="updateNetTotal(i)"
                 >
                   <option style="color: black">1</option>
                   <option style="color: black">2</option>
@@ -451,7 +460,10 @@
             <!-- Price column -->
             <ng-container matColumnDef="price">
               <mat-header-cell *matHeaderCellDef> Price </mat-header-cell>
-              <mat-cell *matCellDef="let element" [formGroup]="element">
+              <mat-cell
+                *matCellDef="let element; let i = index"
+                [formGroup]="element"
+              >
                 <input
                   class="form-control"
                   currencyMask
@@ -462,6 +474,7 @@
                   mvndrMatCurrencyFormat
                   [allowNegative]="false"
                   [currencyCode]="'EGP'"
+                  (change)="updateNetTotal(i)"
                 />
               </mat-cell>
             </ng-container>
@@ -469,13 +482,20 @@
             <!-- Discount Column -->
             <ng-container matColumnDef="discount">
               <mat-header-cell *matHeaderCellDef> Discount </mat-header-cell>
-              <mat-cell *matCellDef="let element" [formGroup]="element">
-                <input
-                  class="form-control"
-                  placeholder="Discount"
-                  required
-                  formControlName="discount"
-                />
+              <mat-cell
+                *matCellDef="let element; let i = index"
+                [formGroup]="element"
+              >
+                <div class="input-group mb-3">
+                  <input
+                    class="form-control"
+                    placeholder="Discount"
+                    required
+                    formControlName="discount"
+                    (change)="updateNetTotal(i)"
+                  />
+                  <span class="input-group-text">%</span>
+                </div>
               </mat-cell>
             </ng-container>
 
@@ -494,6 +514,26 @@
               </mat-cell>
             </ng-container>
 
+            <!-- Net Total Column -->
+            <ng-container matColumnDef="netTotal">
+              <mat-header-cell *matHeaderCellDef> Net Total </mat-header-cell>
+              <mat-cell
+                *matCellDef="let element; let i = index"
+                [formGroup]="element"
+              >
+                <input
+                  readonly
+                  class="form-control"
+                  placeholder="0.00"
+                  required
+                  formControlName="netTotal"
+                  mvndrMatCurrencyFormat
+                  [allowNegative]="false"
+                  [currencyCode]="'EGP'"
+                />
+              </mat-cell>
+            </ng-container>
+
             <mat-header-row
               *matHeaderRowDef="displayedColumns"
             ></mat-header-row>
@@ -503,7 +543,9 @@
           <div class="card-footer">
             <div class="row text-right">
               <!-- TODO:ADD CURRENCY -->
-              <h3>Net Total= {{ totalPrice | currency: "EGP" }}</h3>
+              <h3>Total Discount = {{ totalDiscount | currency: "EGP" }}</h3>
+              <h3>Total Tax = {{ totalTax | currency: "EGP" }}</h3>
+              <h3>Net Total = {{ totalPrice | currency: "EGP" }}</h3>
             </div>
             <br />
             <button
@@ -530,6 +572,53 @@
     </div>
     <div id="myFormPrint" style="display: none">
       <app-print-invoice [inputForm]="invoiceForm.value"></app-print-invoice>
+    </div>
+  </form>
+</div>
+
+<div>
+  <h3>Taxes</h3>
+  <button type="button" (click)="addTax()">Add Tax</button>
+  <form class="form" [formGroup]="taxForm" autocomplete="off">
+    <div formArrayName="taxes">
+      <div
+        *ngFor="let attribute of taxes().controls; let i = index"
+        [formGroupName]="i"
+      >
+        <!-- Tax Type -->
+        <mat-label>Tax Type</mat-label>
+        <mat-select formControlName="type">
+          <mat-option>-- None --</mat-option>
+          <mat-optgroup *ngFor="let taxType of taxArr" [label]="taxType.Code">
+            <!-- <ng-container> -->
+            <!-- <mat-option>
+            <ngx-mat-select-search
+              [formControl]="bankFilterCtrl"
+            ></ngx-mat-select-search>
+          </mat-option> -->
+            <mat-option
+              formControlName="subType"
+              *ngFor="let subTaxType of taxType.sub_tax"
+              [value]="subTaxType.Code"
+            >
+              {{ subTaxType.Code }}
+            </mat-option>
+            <!-- </ng-container> -->
+          </mat-optgroup>
+        </mat-select>
+        <!-- Tax amount -->
+        <input
+          class="form-control"
+          currencyMask
+          placeholder="0.00 EGP"
+          required
+          formControlName="amount"
+          value=""
+          mvndrMatCurrencyFormat
+          [allowNegative]="false"
+          [currencyCode]="'EGP'"
+        />
+      </div>
     </div>
   </form>
 </div>
