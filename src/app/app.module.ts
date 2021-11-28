@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import {MatCheckboxModule} from '@angular/material/checkbox';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { HttpClientModule } from '@angular/common/http';
-import {MatRadioModule} from '@angular/material/radio';
-import {MatTableModule} from '@angular/material/table';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatTableModule } from '@angular/material/table';
 import { MatSelectModule } from '@angular/material/select';
-import {MatPaginatorModule} from '@angular/material/paginator';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { AppRoutingModule } from './app-routing.module';
@@ -14,7 +14,7 @@ import { AppComponent } from './app.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { SubmitInvoiceComponent } from './submit-invoice/submit-invoice.component';
 import { PrintInvoiceComponent } from './shared/print-invoice/print-invoice.component';
-import {NgxPrintModule} from 'ngx-print';
+import { NgxPrintModule } from 'ngx-print';
 import { AuthGuard } from './shared/_guards/authGuard';
 import { APP_BASE_HREF } from '@angular/common';
 import { AuthenticationService } from './shared/_services/authentication.service';
@@ -40,6 +40,7 @@ import { PendingInvoicesComponent } from './pending-invoices/pending-invoices.co
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { InvoiceService } from './shared/_services/invoice.service';
+import { MatCurrencyFormatModule } from 'mat-currency-format';
 
 @NgModule({
   declarations: [
@@ -54,8 +55,9 @@ import { InvoiceService } from './shared/_services/invoice.service';
     LoginComponent,
     DashboardComponent,
     ReceivedDocumentsComponent,
-    PendingInvoicesComponent
+    PendingInvoicesComponent,
   ],
+  exports: [MatInputModule, MatFormFieldModule],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -67,32 +69,34 @@ import { InvoiceService } from './shared/_services/invoice.service';
     MatCheckboxModule,
     MatRadioModule,
     MatDialogModule,
+    MatCurrencyFormatModule,
     MatButtonModule,
     MatTableModule,
     MatPaginatorModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    ToastrModule.forRoot()
+    ToastrModule.forRoot(),
   ],
-  providers: [{ provide: APP_BASE_HREF, useValue: '/' },
-  AuthGuard,
-  AuthenticationService,
-  UserService,
-  CodesService,
-  UploadFilesService,
-  DocumentService,
-  IssuerService,
-  NotificationService,
-  InvoiceService,
-  AppService
-  // ,
-  // {
-  //     provide: HTTP_INTERCEPTORS,
-  //     useClass: JwtInterceptor,
-  //     multi: true
-  // }
-],
-  bootstrap: [AppComponent]
+  providers: [
+    { provide: APP_BASE_HREF, useValue: '/' },
+    AuthGuard,
+    AuthenticationService,
+    UserService,
+    CodesService,
+    UploadFilesService,
+    DocumentService,
+    IssuerService,
+    NotificationService,
+    InvoiceService,
+    AppService,
+    // ,
+    // {
+    //     provide: HTTP_INTERCEPTORS,
+    //     useClass: JwtInterceptor,
+    //     multi: true
+    // }
+  ],
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

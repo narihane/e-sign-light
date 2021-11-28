@@ -7,3 +7,33 @@
 .example-radio-button {
   margin: 5px;
 }
+
+.mat-column-quantity {
+  max-width: 60px;
+  text-align: center;
+}
+
+.mat-column-unitType {
+  max-width: 60px;
+  text-align: center;
+}
+
+.mat-column-weight {
+  max-width: 100px;
+  text-align: center;
+}
+
+.mat-column-price {
+  max-width: 100px;
+  text-align: center;
+}
+
+.mat-column-discount {
+  max-width: 100px;
+  text-align: center;
+}
+
+.mat-column-category {
+  max-width: 120px;
+  text-align: center;
+}
