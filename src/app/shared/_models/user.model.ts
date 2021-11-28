@@ -1,5 +1,5 @@
 
-import { Role } from "./role.model";
+import { Role, Status } from "./role.model";
 export interface RegisterUser {
   userName: string;
   password: string;
@@ -21,6 +21,7 @@ export class User {
     lastName: string="";
     role: Role=Role.User;
     token?: string;
+    status:Status=Status.Rejected;
 }
 
 export interface UserData {
