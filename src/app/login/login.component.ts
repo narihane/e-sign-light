@@ -4,6 +4,7 @@ import { FormBuilder } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
+import { first } from 'rxjs/operators';
 import { AuthenticationService } from '../shared/_services/authentication.service';
 import { UserService } from '../shared/_services/user.service';
 
@@ -17,6 +18,7 @@ export class LoginComponent implements OnInit {
   closeResult = '';
   modalReference: any;
   loading = false;
+  submitted=false;
   returnUrl: string = '';
   loginForm = new FormGroup({
     email: new FormControl('', [
@@ -39,8 +41,6 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // reset login status
-    this.authenticationService.logout();
 
     // get return url from route parameters or default to '/'
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
@@ -53,17 +53,25 @@ export class LoginComponent implements OnInit {
 
 
   onLogin(): void {
-    this.authenticationService.login(this.email, this.password).subscribe((data) => console.log(data));
+    this.submitted=true;
     // stop here if form is invalid
     if (this.loginForm.invalid) {
       //TODO:HANDLE ERROR OF INVALID LOGIN
       return;
     }
-    // API for login access token
-    this.router.navigate(['/'], {
-      skipLocationChange: true
-    });
-    this.loginForm.reset();
+    this.loading=true;
+    this.authenticationService.login(this.email, this.password).pipe(first()).subscribe((data) => {
+      console.log(data);
+      this.router.navigate([this.returnUrl], {
+        skipLocationChange: true
+      })}, error=>{
+        this.loading=false;
+      }
+    );
+  }
+
+  get form(){
+    return this.loginForm.controls;
   }
 
   // register() {

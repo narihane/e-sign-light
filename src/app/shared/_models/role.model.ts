@@ -1,6 +1,6 @@
 export enum Role {
-  User = 0,
-  Admin = 1
+  User = 1,
+  Admin = 0
 }
 export enum Status {
   Approved = 0,

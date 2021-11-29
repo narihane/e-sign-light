@@ -1,4 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { Role } from '../shared/_models/role.model';
+import { User } from '../shared/_models/user.model';
+import { AuthenticationService } from '../shared/_services/authentication.service';
 
 
 export interface RouteInfo {
@@ -6,14 +10,15 @@ export interface RouteInfo {
   title: string;
   icon: string;
   class: string;
+  user:boolean;
 }
 
 export const ROUTES: RouteInfo[] = [
-  { path: '/submit-invoice', title: 'Submit Invoice', icon: 'nc-bank', class: '' },
-  { path: '/get-invoices', title: 'Get Documents', icon: 'nc-diamond', class: '' },
-  { path: '/pending-invoices',         title: 'Pending Invoices',             icon:'nc-diamond',    class: '' },
-  { path: '/admin-settings', title: 'Admin Settings', icon: 'nc-single-02', class: '' },
-  { path: '/codemap', title: 'Code Mapping', icon: 'nc-tile-56', class: '' },
+  { path: '/submit-invoice', title: 'Submit Invoice', icon: 'nc-bank', class: '', user:true},
+  { path: '/get-invoices', title: 'Get Documents', icon: 'nc-diamond', class: '', user:false },
+  { path: '/pending-invoices',         title: 'Pending Invoices',             icon:'nc-diamond',    class: '', user:false },
+  { path: '/admin-settings', title: 'Admin Settings', icon: 'nc-single-02', class: '', user:false },
+  { path: '/codemap', title: 'Code Mapping', icon: 'nc-tile-56', class: '', user:false },
 
 ];
 
@@ -24,7 +29,23 @@ export const ROUTES: RouteInfo[] = [
 
 export class SidebarComponent implements OnInit {
   public menuItems: any[] = [];
+  currentUser!: User;
+  constructor(
+    private router: Router,
+    private authenticationService: AuthenticationService
+) {
+    this.authenticationService.currentUser.subscribe(x => this.currentUser = x);
+}
   ngOnInit() {
     this.menuItems = ROUTES.filter(menuItem => menuItem);
+  }
+
+  isAdmin()
+    {
+      return this.currentUser && this.currentUser.role === Role.Admin;
+  }
+
+  logout(){
+    this.authenticationService.logout();
   }
 }

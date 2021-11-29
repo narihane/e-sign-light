@@ -1,29 +1,73 @@
 <nav class="navbar navbar-light bg-light">
-    <div class="container-fluid">
-        <span class="navbar-brand">Fawarteerak</span>
-        <form class="d-flex">
-            <span class="nav-link" href="">Have an issue?</span>
-        </form>
-    </div>
+  <div class="container-fluid">
+    <span class="navbar-brand">Fawarteerak</span>
+    <form class="d-flex">
+      <span class="nav-link" href="">Have an issue?</span>
+    </form>
+  </div>
 </nav>
 
 <div class="container">
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card">
-                <form class="form box" [formGroup]="loginForm" (ngSubmit)="onLogin()">
-                    <h1>Login</h1>
-                    <p class="text-muted"> Please enter your email and password!</p>
-                    <input type="text" placeholder="Email" class="form-control" id="email" name="email" required formControlName="email">
-                    <input type="password" class="form-control" placeholder="Password" class="form-control" id="password" name="password" required formControlName="password">
-                    <!-- TODO: FORGOT PASSWORD HANDLING! -->
-                    <!-- <a class="forgot text-muted" href="#">Forgot password?</a> -->
-                    <input type="submit" name="" value="Login">
-                    <p class="text-muted">
-                        Don't have an account yet?
-                        <a href="javascript:void(0)" (click)="open(content)"> Register here</a>.
-                    </p>
-                    <!-- <div class="col-md-12">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <form class="form box" [formGroup]="loginForm" (ngSubmit)="onLogin()">
+          <h1>Login</h1>
+          <p class="text-muted">Please enter your email and password!</p>
+          <input
+            type="text"
+            placeholder="Email"
+            class="form-control"
+            id="email"
+            name="email"
+            required
+            formControlName="email"
+            [ngClass]="{ 'is-invalid': submitted && form.email.errors }"
+          />
+          <div *ngIf="submitted && form.email.errors" class="invalid-feedback">
+            <div *ngIf="form.email.errors.required">Email is required</div>
+          </div>
+          <input
+            type="password"
+            class="form-control"
+            placeholder="Password"
+            class="form-control"
+            id="password"
+            name="password"
+            required
+            formControlName="password"
+            [ngClass]="{ 'is-invalid': submitted && form.password.errors }"
+          />
+          <div
+            *ngIf="submitted && form.password.errors"
+            class="invalid-feedback"
+          >
+            <div *ngIf="form.password.errors.required">
+              Password is required
+            </div>
+          </div>
+          <!-- TODO: FORGOT PASSWORD HANDLING! -->
+          <!-- <a class="forgot text-muted" href="#">Forgot password?</a> -->
+          <button
+            class="btn btn-primary"
+            [disabled]="loading"
+            type="submit"
+            name=""
+            value="Login"
+          >
+            <span
+              *ngIf="loading"
+              class="spinner-border spinner-border-sm mr-1"
+            ></span>
+            Login
+          </button>
+          <p class="text-muted">
+            Don't have an account yet?
+            <a href="javascript:void(0)" (click)="open(content)">
+              Register here</a
+            >.
+          </p>
+          <!-- <div class="col-md-12">
                         <ul class="social-network social-circle">
                             <li><a href="#" class="icoFacebook" title="Facebook"><i class="fab
                     fa-facebook-f"></i></a></li>
@@ -33,13 +77,15 @@
                     fa-google-plus"></i></a></li>
                         </ul>
                     </div> -->
-                </form>
-            </div>
-        </div>
-
-        <!-- Register form -->
-        <ng-template #content let-modal>
-            <app-registered-users [modalReference]="modalReference"></app-registered-users>
-        </ng-template>
+        </form>
+      </div>
     </div>
+
+    <!-- Register form -->
+    <ng-template #content let-modal>
+      <app-registered-users
+        [modalReference]="modalReference"
+      ></app-registered-users>
+    </ng-template>
+  </div>
 </div>

@@ -5,7 +5,7 @@ import { catchError, map } from 'rxjs/operators';
 import { environment } from "src/environments/environment";
 import { RegisterUser, User } from '../_models/user.model';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class AuthenticationService {
   private currentUserSubject: BehaviorSubject<User>;
   public currentUser: Observable<User>;
@@ -16,6 +16,8 @@ export class AuthenticationService {
   }
 
   public get currentUserValue(): User {
+    console.log("currentUserSubject", this.currentUserSubject)
+    console.log("currentUser", this.currentUser)
     return this.currentUserSubject.value;
   }
 
@@ -24,13 +26,12 @@ export class AuthenticationService {
       'userName': username,
       'password': password
     }
-    return this.http.post(environment.backendUrl + '/login', body, {
-      responseType: 'text'
-    }).pipe(
-      map((user: any) => {
+    return this.http.post<User>(environment.backendUrl + '/login', body).pipe(
+      map((user: User) => {
         // login successful if there's a jwt token in the response
         if (user && user.token) {
           // store user details and jwt token in local storage to keep user logged in between page refreshes
+          console.log("Login successful", JSON.stringify(user))
           localStorage.setItem('currentUser', JSON.stringify(user));
           this.currentUserSubject.next(user);
         }

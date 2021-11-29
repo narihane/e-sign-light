@@ -15,7 +15,7 @@ const routes: Routes = [
   {
     path: '', component: SidebarComponent, canActivate: [AuthGuard],
     children:
-      [{ path: '', redirectTo: 'get-invoices', pathMatch: 'full', },
+      [{ path: '', redirectTo: 'submit-invoice', pathMatch: 'prefix', },
       { path: 'submit-invoice', component: SubmitInvoiceComponent },
       { path: 'pending-invoices', component: PendingInvoicesComponent, data: { roles: [Role.Admin] } },
       { path: 'admin-settings', component: AdminSettingsComponent, data: { roles: [Role.Admin] } },
