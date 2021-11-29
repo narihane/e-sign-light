@@ -14,12 +14,13 @@ export interface RouteInfo {
 }
 
 export const ROUTES: RouteInfo[] = [
-  { path: '/submit-invoice', title: 'Submit Invoice', icon: 'nc-bank', class: '', user:true},
-  { path: '/get-invoices', title: 'Get Documents', icon: 'nc-diamond', class: '', user:false },
-  { path: '/pending-invoices',         title: 'Pending Invoices',             icon:'nc-diamond',    class: '', user:false },
-  { path: '/admin-settings', title: 'Admin Settings', icon: 'nc-single-02', class: '', user:false },
-  { path: '/codemap', title: 'Code Mapping', icon: 'nc-tile-56', class: '', user:false },
-
+{ path: '/dashboard', title: 'Dashboard', icon: 'nc-bank', class: '', user:false },
+{ path: '/add-invoice', title: 'Add Invoice', icon: 'nc-bank', class: '', user:true},
+{ path: '/pending-invoices', title: 'Pending Invoices', icon:'nc-diamond',class: '', user:false },
+{ path: '/submitted-documents', title: 'Submitted Documents', icon: 'nc-diamond', class: '', user:false },
+{ path: '/received-documents', title: 'Received Documents', icon: 'nc-diamond', class: '', user:false },
+{ path: '/codemap', title: 'Code Mapping', icon: 'nc-tile-56', class: '', user:false },
+{ path: '/admin-settings', title: 'Admin Settings', icon: 'nc-single-02', class: '', user:false },
 ];
 
 @Component({

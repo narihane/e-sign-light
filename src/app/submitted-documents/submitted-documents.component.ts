@@ -11,11 +11,11 @@ import { DocumentResult } from '../shared/_models/documents.response.model';
 import { DocumentService } from '../shared/_services/document.service';
 
 @Component({
-  selector: 'app-get-invoices',
-  templateUrl: './get-invoices.component.html',
-  styleUrls: ['./get-invoices.component.css']
+  selector: 'app-submitted-documents',
+  templateUrl: './submitted-documents.component.html',
+  styleUrls: ['./submitted-documents.component.css']
 })
-export class GetInvoicesComponent implements OnInit {
+export class SubmittedDocumentsComponent implements OnInit {
   displayedColumns: string[] = ['uuid', 'dateTimeIssued', 'status', 'total'];
   dataSource: MatTableDataSource<DocumentResult>;
 

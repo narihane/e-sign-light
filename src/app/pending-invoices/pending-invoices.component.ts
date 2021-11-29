@@ -108,4 +108,3 @@ export class PendingInvoicesComponent implements OnInit {
 function DialogBoxComponent(DialogBoxComponent: any, arg1: { width: string; data: any; }) {
   throw new Error('Function not implemented.');
 }
-

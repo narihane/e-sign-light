@@ -28,8 +28,8 @@ import { AdminSettingsComponent } from './admin-settings/admin-settings.componen
 import { CodeMappingComponent } from './code-mapping/code-mapping.component';
 import { RegisteredUsersComponent } from './registered-users/registered-users.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { GetInvoicesComponent } from './get-invoices/get-invoices.component';
 import {MatButtonModule} from '@angular/material/button';
+import { SubmittedDocumentsComponent } from './submitted-documents/submitted-documents.component';
 import { LoginComponent } from './login/login.component';
 import { CodesService } from './shared/_services/codes.service';
 import { DocumentService } from './shared/_services/document.service';
@@ -40,6 +40,8 @@ import { InvoiceService } from './shared/_services/invoice.service';
 import { PendingInvoicesComponent } from './pending-invoices/pending-invoices.component';
 import { DialogComponent } from './shared/dialog/dialog.component';
 import { ErrorInterceptor } from './shared/_helpers/error.interceptor';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { ReceivedDocumentsComponent } from './received-documents/received-documents.component';
 
 @NgModule({
   declarations: [
@@ -50,10 +52,14 @@ import { ErrorInterceptor } from './shared/_helpers/error.interceptor';
     AdminSettingsComponent,
     CodeMappingComponent,
     RegisteredUsersComponent,
-    GetInvoicesComponent,
     LoginComponent,
     PendingInvoicesComponent,
-    DialogComponent
+    DialogComponent,
+    SubmittedDocumentsComponent,
+    LoginComponent,
+    DashboardComponent,
+    ReceivedDocumentsComponent,
+    PendingInvoicesComponent
   ],
   imports: [
     BrowserModule,
@@ -65,6 +71,8 @@ import { ErrorInterceptor } from './shared/_helpers/error.interceptor';
     BrowserAnimationsModule,
     MatCheckboxModule,
     MatRadioModule,
+    MatDialogModule,
+    MatButtonModule,
     MatTableModule,
     MatPaginatorModule,
     MatFormFieldModule,
@@ -84,6 +92,7 @@ import { ErrorInterceptor } from './shared/_helpers/error.interceptor';
   IssuerService,
   InvoiceService,
   NotificationService,
+  InvoiceService,
   AppService,
   { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
   { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
