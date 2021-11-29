@@ -4,6 +4,7 @@ import { FormBuilder } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
+import { first } from 'rxjs/operators';
 import { AuthenticationService } from '../shared/_services/authentication.service';
 import { UserService } from '../shared/_services/user.service';
 
@@ -17,6 +18,7 @@ export class LoginComponent implements OnInit {
   closeResult = '';
   modalReference: any;
   loading = false;
+  submitted=false;
   returnUrl: string = '';
   loginForm = new FormGroup({
     email: new FormControl('', [
@@ -27,61 +29,49 @@ export class LoginComponent implements OnInit {
     ])
   });
 
-
-  checkPasswords: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
-    let pass = group.get('password')?.value;
-    let confirmPass = group.get('confirmPassword')?.value
-    return pass === confirmPass ? null : { notSame: true }
-  }
-
-  registerForm = new FormGroup({
-    name: new FormControl('', [
-      Validators.required
-    ]),
-    email: new FormControl('', [
-      Validators.required
-    ]),
-    password: new FormControl('', [
-      Validators.required
-    ]),
-    confirmPassword: new FormControl('', [
-      Validators.required
-    ]),
-  }, { validators: this.checkPasswords });
-
   constructor(private modalService: NgbModal, private route: ActivatedRoute,
     private router: Router, private formBuilder: FormBuilder,
     private authenticationService: AuthenticationService,
     // private userService: UserService
-    ) { }
+  ) {
+    // redirect to home if already logged in
+    if (this.authenticationService.currentUserValue) {
+      this.router.navigate(['/']);
+    }
+  }
 
   ngOnInit(): void {
-    // reset login status
-    // this.authenticationService.logout();
 
     // get return url from route parameters or default to '/'
-    // this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
   }
 
   //Login
   get email() { return this.loginForm.get('email')?.value; }
   get password() { return this.loginForm.get('password')?.value; }
 
-  //Register
-  get name() { return this.registerForm.get('name'); }
-  get emailReg() { return this.registerForm.get('email'); }
-  get passReg() { return this.registerForm.get('password'); }
-  get confirmPass() { return this.registerForm.get('confirmPassword'); }
 
 
   onLogin(): void {
-    this.authenticationService.login(this.email,this.password).subscribe((data) => console.log(data));
-    // API for login access token
+    this.submitted=true;
+    // stop here if form is invalid
+    if (this.loginForm.invalid) {
+      //TODO:HANDLE ERROR OF INVALID LOGIN
+      return;
+    }
+    this.loading=true;
+    this.authenticationService.login(this.email, this.password).pipe(first()).subscribe((data) => {
+      console.log(data);
+      this.router.navigate([this.returnUrl], {
+        skipLocationChange: true
+      })}, error=>{
+        this.loading=false;
+      }
+    );
+  }
 
-    this.router.navigate(['home'], {
-      skipLocationChange: true
-    });
-    this.loginForm.reset();
+  get form(){
+    return this.loginForm.controls;
   }
 
   // register() {
@@ -109,22 +99,6 @@ export class LoginComponent implements OnInit {
           this.loading = false;
         });
   }*/
-
-  onAdminLogin(): void {
-    this.router.navigate(['adminMain'], {
-      queryParams:
-        { email: this.email, password: this.password }, skipLocationChange: true
-    });
-    this.loginForm.reset();
-  }
-
-  onRegSubmit(): void {
-    // Process checkout data here
-    console.log('Register', this.registerForm.value);
-    // API post for registering users
-    this.modalReference.close();
-    this.registerForm.reset();
-  }
 
   open(content: any) {
     this.modalReference = this.modalService.open(content);

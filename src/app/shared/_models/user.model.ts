@@ -1,4 +1,6 @@
-export interface User {
+
+import { Role, Status } from "./role.model";
+export interface RegisterUser {
   userName: string;
   password: string;
   userRole: number;
@@ -9,6 +11,17 @@ export interface User {
   street: string;
   city: string;
   country: string;
+}
+//Returns from post request of login
+export class User {
+    id: number=0;
+    username: string="";
+    password: string="";
+    firstName: string="";
+    lastName: string="";
+    role: Role=Role.User;
+    token?: string;
+    status:Status=Status.Rejected;
 }
 
 export interface UserData {
