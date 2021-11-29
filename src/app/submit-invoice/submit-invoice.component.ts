@@ -317,6 +317,33 @@ export class SubmitInvoiceComponent implements OnInit {
       }
     });
   }
+
+  displaySubTax(i: number) {
+    const taxFormValue = this.taxes().value[i];
+    if (taxFormValue['type'] == '') {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  displayAmount(i: number) {
+    return this.taxArr.filter(
+      (e1) => this.taxForm.get(['taxes', i, 'type'])?.value === e1.Code
+    )[0]?.amount;
+  }
+
+  displayRate(i: number) {
+    return this.taxArr.filter(
+      (e1) => this.taxForm.get(['taxes', i, 'type'])?.value === e1.Code
+    )[0]?.rate;
+  }
+
+  subTaxArray(i: number) {
+    return this.taxArr.filter(
+      (e1) => this.taxForm.get(['taxes', i, 'type'])?.value === e1.Code
+    )[0]?.sub_tax;
+  }
 }
 
 function ValidateTotalPrice(

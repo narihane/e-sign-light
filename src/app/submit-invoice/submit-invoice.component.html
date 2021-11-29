@@ -576,6 +576,7 @@
   </form>
 </div>
 
+<!-- TAXES -->
 <div>
   <h3>Taxes</h3>
   <button type="button" (click)="addTax()">Add Tax</button>
@@ -587,25 +588,23 @@
       >
         <!-- Tax Type -->
         <mat-label>Tax Type</mat-label>
-        <mat-select formControlName="type">
-          <mat-option>-- None --</mat-option>
-          <mat-optgroup *ngFor="let taxType of taxArr" [label]="taxType.Code">
-            <!-- <ng-container> -->
-            <!-- <mat-option>
-            <ngx-mat-select-search
-              [formControl]="bankFilterCtrl"
-            ></ngx-mat-select-search>
-          </mat-option> -->
-            <mat-option
-              formControlName="subType"
-              *ngFor="let subTaxType of taxType.sub_tax"
-              [value]="subTaxType.Code"
-            >
-              {{ subTaxType.Code }}
-            </mat-option>
-            <!-- </ng-container> -->
-          </mat-optgroup>
+        <mat-select formControlName="type" (change)="displaySubTax(i)">
+          <mat-option *ngFor="let tax of taxArr" [value]="tax.Code">
+            {{ tax.Code }}
+          </mat-option>
         </mat-select>
+
+        <!-- Sub Tax Type -->
+        <mat-label>Sub Tax Type</mat-label>
+        <mat-select formControlName="subType" [disabled]="displaySubTax(i)">
+          <mat-option
+            *ngFor="let subTax of subTaxArray(i)"
+            [value]="subTax.Code"
+          >
+            {{ subTax.Code }}
+          </mat-option>
+        </mat-select>
+
         <!-- Tax amount -->
         <input
           class="form-control"
@@ -617,7 +616,19 @@
           mvndrMatCurrencyFormat
           [allowNegative]="false"
           [currencyCode]="'EGP'"
+          [readonly]="displayAmount(i)"
         />
+        <!-- Tax rate -->
+        <div class="input-group mb-3">
+          <input
+            class="form-control"
+            required
+            formControlName="rate"
+            value=""
+            [readonly]="displayRate(i)"
+          />
+          <span class="input-group-text">%</span>
+        </div>
       </div>
     </div>
   </form>
