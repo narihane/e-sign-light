@@ -16,10 +16,10 @@ export interface Address {
 }
 
 export interface Receiver {
-  address?: Address;
-  type?: string;
-  id?: string;
-  name: string;
+    address?: Address;
+    type?: string;
+    id?: string;
+    name: string;
 }
 
 export interface Payment {

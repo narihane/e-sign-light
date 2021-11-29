@@ -21,12 +21,14 @@ import { AuthenticationService } from './shared/_services/authentication.service
 import { UserService } from './shared/_services/user.service';
 import { UploadFilesService } from './shared/_services/upload-file.service';
 import { AppService } from './shared/_services/app.service';
+import { MatDialogModule } from '@angular/material/dialog';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { JwtInterceptor } from './shared/_helpers/jwt.interceptor';
 import { AdminSettingsComponent } from './admin-settings/admin-settings.component';
 import { CodeMappingComponent } from './code-mapping/code-mapping.component';
 import { RegisteredUsersComponent } from './registered-users/registered-users.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatButtonModule } from '@angular/material/button';
 import { SubmittedDocumentsComponent } from './submitted-documents/submitted-documents.component';
 import { LoginComponent } from './login/login.component';
 import { CodesService } from './shared/_services/codes.service';
@@ -34,12 +36,12 @@ import { DocumentService } from './shared/_services/document.service';
 import { IssuerService } from './shared/_services/issuer.service';
 import { NotificationService } from './shared/_services/notifications.service';
 import { ToastrModule, ToastrService } from 'ngx-toastr';
+import { InvoiceService } from './shared/_services/invoice.service';
+import { PendingInvoicesComponent } from './pending-invoices/pending-invoices.component';
+import { DialogComponent } from './shared/dialog/dialog.component';
+import { ErrorInterceptor } from './shared/_helpers/error.interceptor';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ReceivedDocumentsComponent } from './received-documents/received-documents.component';
-import { PendingInvoicesComponent } from './pending-invoices/pending-invoices.component';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { InvoiceService } from './shared/_services/invoice.service';
 import { MatCurrencyFormatModule } from 'mat-currency-format';
 import { PercentageMaskDirective } from './shared/_directives/percentage-mask.directive';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
@@ -52,6 +54,9 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
     AdminSettingsComponent,
     CodeMappingComponent,
     RegisteredUsersComponent,
+    LoginComponent,
+    PendingInvoicesComponent,
+    DialogComponent,
     SubmittedDocumentsComponent,
     LoginComponent,
     DashboardComponent,
@@ -78,6 +83,8 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
     MatPaginatorModule,
     MatFormFieldModule,
     MatInputModule,
+    MatDialogModule,
+    MatButtonModule,
     MatSelectModule,
     ToastrModule.forRoot(),
   ],
@@ -90,15 +97,12 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
     UploadFilesService,
     DocumentService,
     IssuerService,
+    InvoiceService,
     NotificationService,
     InvoiceService,
     AppService,
-    // ,
-    // {
-    //     provide: HTTP_INTERCEPTORS,
-    //     useClass: JwtInterceptor,
-    //     multi: true
-    // }
+    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
   ],
   bootstrap: [AppComponent],
 })
