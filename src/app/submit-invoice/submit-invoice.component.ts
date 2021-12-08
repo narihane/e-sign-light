@@ -1,3 +1,10 @@
+import {
+  animate,
+  state,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
 import { Component, OnInit } from '@angular/core';
 import {
   AbstractControl,
@@ -17,18 +24,36 @@ import {
 } from '../shared/_models/AE-invoice.model';
 import { CodeSearch } from '../shared/_models/codes.models';
 import { Invoice, Item, ItemNames } from '../shared/_models/invoice.model';
-import { Tax } from '../shared/_models/tax.model';
+import { Tax, TaxFields } from '../shared/_models/tax.model';
 import { AppService } from '../shared/_services/app.service';
 import { CodesService } from '../shared/_services/codes.service';
 import { InvoiceService } from '../shared/_services/invoice.service';
 import { IssuerService } from '../shared/_services/issuer.service';
 
+export interface ItemTax {
+  type: string;
+  sub_type: string;
+  amount: number;
+  rate: number;
+}
+
 @Component({
   selector: 'app-submit-invoice',
   templateUrl: './submit-invoice.component.html',
   styleUrls: ['./submit-invoice.component.css'],
+  animations: [
+    trigger('detailExpand', [
+      state('collapsed', style({ height: '0px', minHeight: '0' })),
+      state('expanded', style({ height: '*' })),
+      transition(
+        'expanded <=> collapsed',
+        animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')
+      ),
+    ]),
+  ],
 })
 export class SubmitInvoiceComponent implements OnInit {
+  expandedElement!: ItemTax | null;
   //Main form group
   invoiceForm: FormGroup;
   categories: CodeSearch[] = [];
@@ -115,10 +140,15 @@ export class SubmitInvoiceComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.dataSource = new MatTableDataSource(this.items().controls);
+    this.populateCategories();
+  }
+
+  populateCategories() {
     this.codeService.getCodes(1, 10).subscribe((data) => {
       this.categories = data;
     });
-    this.dataSource = new MatTableDataSource(this.items().controls);
+    console.log(this.categories);
   }
 
   items(): FormArray {
@@ -207,8 +237,8 @@ export class SubmitInvoiceComponent implements OnInit {
             valueDifference: 0.0,
             totalTaxableFees: 0,
             discount: {
-              rate: 10.0,
-              amount: 0,
+              rate: element.discount,
+              amount: (element.discount / 100) * element.price,
             },
             taxableItems: [
               {
@@ -286,14 +316,16 @@ export class SubmitInvoiceComponent implements OnInit {
   }
 
   addTax() {
-    this.taxes().push(this.newTax());
-    this.taxes().value.forEach((e: any) => {
+    const totalTaxableFees = this.taxes().push(this.newTax());
+    this.taxes().value.forEach((e: any, i: number) => {
       //Calculate for T1
 
       switch (e['type']) {
         case 'T1':
           //Amount = (Amount+Net Total + TotalTaxableFees+Value Diff + Taxable item.Amount)*Rate - > Taxable item.Amount == sum of all items in taxable array
-          e['amount']?.setValue(0);
+          // e['amount']?.setValue(
+          //   0 + this.invoiceForm.get(['items', i, 'netTotal'])?.value +
+          // );
           // this.invoiceForm.get(['items', i, 'netTotal'])?.setValue(discount);
           break;
         case 'T2':
@@ -343,6 +375,10 @@ export class SubmitInvoiceComponent implements OnInit {
     return this.taxArr.filter(
       (e1) => this.taxForm.get(['taxes', i, 'type'])?.value === e1.Code
     )[0]?.sub_tax;
+  }
+
+  calculateTaxAmount(i: number) {
+    // const taxAmount = !this.displayAmount(i) ? (this.taxForm.get(['taxes', i, 'rate'])?.value / 100)*
   }
 }
 

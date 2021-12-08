@@ -7,6 +7,8 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatTableModule } from '@angular/material/table';
 import { MatSelectModule } from '@angular/material/select';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { AppRoutingModule } from './app-routing.module';
@@ -31,11 +33,14 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatButtonModule } from '@angular/material/button';
 import { SubmittedDocumentsComponent } from './submitted-documents/submitted-documents.component';
 import { LoginComponent } from './login/login.component';
+import { MatSortModule } from '@angular/material/sort';
 import { CodesService } from './shared/_services/codes.service';
 import { DocumentService } from './shared/_services/document.service';
 import { IssuerService } from './shared/_services/issuer.service';
 import { NotificationService } from './shared/_services/notifications.service';
 import { ToastrModule, ToastrService } from 'ngx-toastr';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 import { InvoiceService } from './shared/_services/invoice.service';
 import { PendingInvoicesComponent } from './pending-invoices/pending-invoices.component';
 import { DialogComponent } from './shared/dialog/dialog.component';
@@ -70,16 +75,20 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
+    MatDatepickerModule,
     NgxPrintModule,
     HttpClientModule,
     BrowserAnimationsModule,
     MatCheckboxModule,
     MatRadioModule,
     MatDialogModule,
+    MatNativeDateModule,
     NgxMatSelectSearchModule,
     MatCurrencyFormatModule,
     MatButtonModule,
+    MatSortModule,
     MatTableModule,
+    MatProgressSpinnerModule,
     MatPaginatorModule,
     MatFormFieldModule,
     MatInputModule,
