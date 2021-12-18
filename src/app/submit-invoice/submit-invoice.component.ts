@@ -5,7 +5,7 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -93,10 +93,18 @@ export class SubmitInvoiceComponent implements OnInit {
     'unitType',
     'price',
     'discount',
+    'value_diff',
+    'total_taxable_fees',
+    'tax',
     'description',
-    // 'tax',
     'netTotal',
   ];
+  taxItems = new FormGroup({
+    type: new FormControl('', [Validators.required]),
+    subType: new FormControl('', [Validators.required]),
+    rate: new FormControl('', [Validators.required]),
+    amount: new FormControl('', [Validators.required]),
+  });
   itemForm = new FormGroup({
     desc: new FormControl('', [Validators.required]),
     quantity: new FormControl('', [Validators.required]),
@@ -104,21 +112,19 @@ export class SubmitInvoiceComponent implements OnInit {
     weight: new FormControl('', [Validators.required]),
     unitType: new FormControl('', [Validators.required]),
     price: new FormControl('', [Validators.required]),
+    value_diff: new FormControl('', [Validators.required]),
+    total_taxable_fees: new FormControl('', [Validators.required]),
+    total_tax: new FormControl('', [Validators.required]),
     discount: new FormControl('', [Validators.required]),
-    tax: new FormControl('', [Validators.required]),
+    tax: this.fb.array([this.taxItems]),
     netTotal: new FormControl(0, [Validators.required]), //Sales Total - Discount Amount -> Sales Total = Quantity*Amount
   });
 
   //Tax Variables
   totalTax = 0;
   taxArr = new Tax().final_tax_arr;
-  taxForm: FormGroup;
-  taxItems = new FormGroup({
-    type: new FormControl('', [Validators.required]),
-    subType: new FormControl('', [Validators.required]),
-    rate: new FormControl('', [Validators.required]),
-    amount: new FormControl('', [Validators.required]),
-  });
+
+  currentInvoiceLineIdx = 0;
 
   constructor(
     private fb: FormBuilder,
@@ -131,9 +137,6 @@ export class SubmitInvoiceComponent implements OnInit {
       items: this.fb.array([this.itemForm]),
       fixed: this.fixedForm,
     });
-    this.taxForm = this.fb.group({
-      taxes: this.fb.array([this.taxItems]),
-    });
     console.log(this.invoiceForm);
     this.dataSource = new MatTableDataSource(this.items().controls);
     console.log(this.dataSource.data);
@@ -141,7 +144,7 @@ export class SubmitInvoiceComponent implements OnInit {
 
   ngOnInit(): void {
     this.dataSource = new MatTableDataSource(this.items().controls);
-    this.populateCategories();
+    // this.populateCategories();
   }
 
   populateCategories() {
@@ -149,6 +152,10 @@ export class SubmitInvoiceComponent implements OnInit {
       this.categories = data;
     });
     console.log(this.categories);
+  }
+
+  setCurrentInvoiceIdx(i: number) {
+    this.currentInvoiceLineIdx = i;
   }
 
   items(): FormArray {
@@ -163,8 +170,18 @@ export class SubmitInvoiceComponent implements OnInit {
       weight: new FormControl('', [Validators.required]),
       unitType: new FormControl('', [Validators.required]),
       price: new FormControl('', [Validators.required]),
+      value_diff: new FormControl('', [Validators.required]),
+      total_taxable_fees: new FormControl('', [Validators.required]),
+      total_tax: new FormControl('', [Validators.required]),
       discount: new FormControl('', [Validators.required]),
-      tax: new FormControl('', [Validators.required]),
+      tax: this.fb.array([
+        new FormGroup({
+          type: new FormControl('', [Validators.required]),
+          subType: new FormControl('', [Validators.required]),
+          rate: new FormControl('', [Validators.required]),
+          amount: new FormControl('', [Validators.required]),
+        }),
+      ]),
       netTotal: new FormControl('', [Validators.required]), //Sales Total - Discount Amount -> Sales Total = Quantity*Amount
     });
   }
@@ -173,7 +190,7 @@ export class SubmitInvoiceComponent implements OnInit {
     this.items().push(this.newInvoice());
     var arr = this.invoiceForm.get('items') as FormArray;
     arr.value.forEach((e: any) => {
-      if (e['price'] > 0) this.totalPrice += parseInt(e['price']);
+      if (e['price'] > 0) this.totalPrice += parseFloat(e['price']);
       console.log(this.totalPrice);
     });
 
@@ -191,7 +208,9 @@ export class SubmitInvoiceComponent implements OnInit {
   //On change of quantity, discount and price -> update net total
   updateNetTotal(i: number) {
     const itemFormValue = this.items().value[i];
-    const salesTotal = itemFormValue['quantity'] * itemFormValue['price'];
+    debugger;
+    const salesTotal =
+      itemFormValue['quantity'] * parseFloat(itemFormValue['price']);
     const discount = ((100 - itemFormValue['discount']) / 100) * salesTotal;
     this.invoiceForm.get(['items', i, 'netTotal'])?.setValue(discount);
     console.log(this.invoiceForm.get(['items', i, 'netTotal']));
@@ -207,7 +226,8 @@ export class SubmitInvoiceComponent implements OnInit {
     if (
       this.invoiceForm.value &&
       this.invoiceForm.get('fixed')?.get('client_id')?.value === '' &&
-      parseInt(this.invoiceForm.get('fixed')?.get('totalPrice')?.value) >= 50000
+      parseFloat(this.invoiceForm.get('fixed')?.get('totalPrice')?.value) >=
+        50000
     ) {
       console.log('Invalid');
     }
@@ -302,8 +322,8 @@ export class SubmitInvoiceComponent implements OnInit {
   }
 
   // Taxes Section
-  taxes(): FormArray {
-    return this.taxForm.get('taxes') as FormArray;
+  taxes(i: number): FormArray {
+    return this.invoiceForm.get(['items', i, 'tax']) as FormArray;
   }
 
   newTax(): FormGroup {
@@ -315,43 +335,115 @@ export class SubmitInvoiceComponent implements OnInit {
     });
   }
 
-  addTax() {
-    const totalTaxableFees = this.taxes().push(this.newTax());
-    this.taxes().value.forEach((e: any, i: number) => {
-      //Calculate for T1
+  addTax(i: number) {
+    console.log(this.invoiceForm);
+    this.taxes(i).push(this.newTax());
+  }
 
-      switch (e['type']) {
-        case 'T1':
-          //Amount = (Amount+Net Total + TotalTaxableFees+Value Diff + Taxable item.Amount)*Rate - > Taxable item.Amount == sum of all items in taxable array
-          // e['amount']?.setValue(
-          //   0 + this.invoiceForm.get(['items', i, 'netTotal'])?.value +
-          // );
-          // this.invoiceForm.get(['items', i, 'netTotal'])?.setValue(discount);
-          break;
-        case 'T2':
-          // Amount = (Net total + totalTaxableFees + valueDifference + taxableItems.taxType(T3).Amount) * Rate
-          e['amount']?.setValue(0);
-          break;
-        case 'T3':
-          // Fixed Amount = Rate should be zero
-          break;
-        case 'T4':
-          // Amount = taxableItem(T4).Rate * (Net total - discount)
-          break;
+  getT3Value(idx: number) {
+    let t3Amount = 0;
+    this.taxes(idx).value.forEach((e: any, i: number) => {
+      if (e['type'] == 'T3') {
+        t3Amount = parseFloat(e['amount']);
+      }
+    });
+    return t3Amount;
+  }
 
-        //T5 --> T12 amount = rate * invoiceline.netTotal except:
+  switchOnTaxes(idx: number, idxTax: number) {
+    let t3Amount = this.getT3Value(idx);
+    this.taxes(idx).value.forEach((e: any, i: number) => {
+      debugger;
+      if (i == idxTax) {
+        switch (e['type']) {
+          case 'T1':
+            //Amount = (Amount+Net Total + TotalTaxableFees+Value Diff + Taxable item.Amount)*Rate - > Taxable item.Amount == sum of all items in taxable array, TotalTaxableFees== field a user enters
+            e['amount'] =
+              (0 +
+                this.invoiceForm.get(['items', idx, 'netTotal'])?.value +
+                this.integerOfField(idx, 'total_tax') +
+                this.integerOfField(idx, 'value_diff') +
+                this.integerOfField(idx, 'total_taxable_fees')) *
+              (parseFloat(e['rate']) / 100);
+            this.invoiceForm
+              .get(['items', idx, 'tax'])
+              ?.get([i, 'amount'])
+              ?.setValue(e['amount']);
+            console.log(e['amount']);
+            // this.invoiceForm.get(['items', i, 'netTotal'])?.setValue(discount);
+            break;
+          case 'T2':
+            // Amount = (Net total + totalTaxableFees + valueDifference + taxableItems.taxType(T3).Amount) * Rate
 
-        case 'T6':
-          // Fixed Amount = Rate should be zero
+            e['amount'] =
+              (this.invoiceForm.get(['items', idx, 'netTotal'])?.value +
+                this.integerOfField(idx, 'value_diff') +
+                this.integerOfField(idx, 'total_taxable_fees') +
+                t3Amount) *
+              (parseFloat(e['rate']) / 100);
+            this.invoiceForm
+              .get(['items', idx, 'tax'])
+              ?.get([i, 'amount'])
+              ?.setValue(e['amount']);
+            this.recalculateT1(idx, e['amount']);
+            debugger;
+            break;
+          case 'T3':
+            // Fixed Amount = Rate should be zero
+            t3Amount = parseFloat(e['amount']);
+            this.recalculateT2(idx, t3Amount);
+            // this.recalculateT1(idx, e['amount']);
+            break;
+          case 'T4':
+            // Amount = taxableItem(T4).Rate * (Net total - discount)
+            this.recalculateT1(idx, e['amount']);
+            break;
 
-          break;
-        default:
+          //T5 --> T12 amount = rate * invoiceline.netTotal except:
+
+          case 'T6':
+            // Fixed Amount = Rate should be zero
+            this.recalculateT1(idx, e['amount']);
+            break;
+          case 'T5':
+          case 'T7':
+          case 'T8':
+          case 'T9':
+          case 'T10':
+          case 'T11':
+          case 'T12':
+            // this.invoiceForm
+            //   .get(['items', idx, 'total_tax'])
+            //   ?.setValue(
+            //     this.invoiceForm.get(['items', idx, 'total_tax'])?.value -
+            //       (e['amount'] === '' ? 0 : parseFloat(e['amount']))
+            //   );
+            e['amount'] =
+              (parseFloat(e['rate']) / 100) *
+              this.invoiceForm.get(['items', idx, 'netTotal'])?.value;
+
+            this.recalculateT1(idx, e['amount']);
+            break;
+          default:
+            break;
+        }
+        this.invoiceForm
+          .get(['items', idx, 'tax'])
+          ?.get([i, 'amount'])
+          ?.setValue(e['amount']);
       }
     });
   }
 
-  displaySubTax(i: number) {
-    const taxFormValue = this.taxes().value[i];
+  integerOfField(idx: number, formField: string) {
+    return this.invoiceForm.get(['items', idx, formField])?.value === '' ||
+      this.invoiceForm.get(['items', idx, formField])?.value === undefined
+      ? 0
+      : parseFloat(this.invoiceForm.get(['items', idx, formField])?.value);
+  }
+
+  displaySubTax(idxTax: number, i: number) {
+    const taxFormValue = this.taxes(idxTax).value[i];
     if (taxFormValue['type'] == '') {
       return true;
     } else {
@@ -359,26 +451,86 @@ export class SubmitInvoiceComponent implements OnInit {
     }
   }
 
-  displayAmount(i: number) {
+  displayAmount(idxInvoice: number, i: number) {
     return this.taxArr.filter(
-      (e1) => this.taxForm.get(['taxes', i, 'type'])?.value === e1.Code
+      (e1) => this.taxes(idxInvoice).value[i]['type'] === e1.Code
     )[0]?.amount;
   }
 
-  displayRate(i: number) {
+  displayRate(idxInvoice: number, i: number) {
     return this.taxArr.filter(
-      (e1) => this.taxForm.get(['taxes', i, 'type'])?.value === e1.Code
+      (e1) => this.taxes(idxInvoice).value[i]['type'] === e1.Code
     )[0]?.rate;
   }
 
-  subTaxArray(i: number) {
+  subTaxArray(idxInvoice: number, i: number) {
     return this.taxArr.filter(
-      (e1) => this.taxForm.get(['taxes', i, 'type'])?.value === e1.Code
+      (e1) => this.taxes(idxInvoice).value[i]['type'] === e1.Code
     )[0]?.sub_tax;
   }
 
-  calculateTaxAmount(i: number) {
-    // const taxAmount = !this.displayAmount(i) ? (this.taxForm.get(['taxes', i, 'rate'])?.value / 100)*
+  calculateTaxAmount(idxInvoice: number, idxTax: number) {
+    // const taxAmount = !this.displayAmount(idxInvoice, i) ? (this.taxes(idxInvoice).value[i]['rate'] / 100)
+    // this.recalculateT1(idxInvoice);
+    this.switchOnTaxes(idxInvoice, idxTax);
+  }
+
+  calculateTotalItemTaxes(idxInvoice: number) {
+    let taxInvoiceLine = 0;
+    this.taxes(idxInvoice).value.forEach((e: any, i: number) => {
+      if (e['type'] != 'T1') {
+        taxInvoiceLine += parseFloat(e['amount']);
+      }
+    });
+    return taxInvoiceLine;
+  }
+
+  recalculateT1(idxInvoice: number, amountTaxItem: any) {
+    let totalTaxInvoiceLines = this.calculateTotalItemTaxes(idxInvoice);
+    this.invoiceForm
+      .get(['items', idxInvoice, 'total_tax'])
+      ?.setValue(totalTaxInvoiceLines);
+    debugger;
+    this.taxes(idxInvoice).value.forEach((e: any, i: number) => {
+      if (e['type'] === 'T1') {
+        e['amount'] =
+          (0 +
+            this.invoiceForm.get(['items', idxInvoice, 'netTotal'])?.value +
+            this.integerOfField(idxInvoice, 'total_tax') +
+            this.integerOfField(idxInvoice, 'value_diff') +
+            this.integerOfField(idxInvoice, 'total_taxable_fees')) *
+          (parseFloat(e['rate']) / 100);
+        this.invoiceForm
+          .get(['items', idxInvoice, 'tax'])
+          ?.get([i, 'amount'])
+          ?.setValue(e['amount']);
+      }
+    });
+    debugger;
+  }
+
+  recalculateT2(idxInvoice: number, t3Amount: number) {
+    this.taxes(idxInvoice).value.forEach((e: any, i: number) => {
+      if (e['type'] == 'T2') {
+        debugger;
+        e['amount'] =
+          (this.invoiceForm.get(['items', idxInvoice, 'netTotal'])?.value +
+            this.integerOfField(idxInvoice, 'value_diff') +
+            this.integerOfField(idxInvoice, 'total_taxable_fees') +
+            t3Amount) *
+          (parseFloat(e['rate']) / 100);
+        this.invoiceForm
+          .get(['items', idxInvoice, 'tax'])
+          ?.get([i, 'amount'])
+          ?.setValue(e['amount']);
+        this.recalculateT1(idxInvoice, e['amount']);
+      }
+    });
+    debugger;
+  }
+
+  displayedAmount(idxInvoice: number, idxTax: number) {
+    return this.taxes(idxInvoice).value[idxTax]['amount'];
   }
 }
 
@@ -389,7 +541,7 @@ function ValidateTotalPrice(
   if (
     control.value &&
     control.get('fixed')?.get('client_id')?.value === '' &&
-    parseInt(control.get('fixed')?.get('totalPrice')?.value) >= 50000
+    parseFloat(control.get('fixed')?.get('totalPrice')?.value) >= 50000
   ) {
     return { clientIDInvalid: true };
   }
@@ -401,7 +553,7 @@ export function creatDateRangeValidator(): ValidatorFn {
     const clientID = control.get('fixed')?.get('client_id')?.value;
 
     const totalPrice = control.get('fixed')?.get('totalPrice')?.value;
-    if (clientID == '' && parseInt(totalPrice) >= 50000) {
+    if (clientID == '' && parseFloat(totalPrice) >= 50000) {
       return { totalPrice: true };
     }
 

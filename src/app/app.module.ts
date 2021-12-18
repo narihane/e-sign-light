@@ -9,6 +9,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { AppRoutingModule } from './app-routing.module';
@@ -50,6 +51,7 @@ import { ReceivedDocumentsComponent } from './received-documents/received-docume
 import { MatCurrencyFormatModule } from 'mat-currency-format';
 import { PercentageMaskDirective } from './shared/_directives/percentage-mask.directive';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
+import { DialogService } from './shared/_services/dialog.service';
 @NgModule({
   declarations: [
     AppComponent,
@@ -89,6 +91,7 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
     MatSortModule,
     MatTableModule,
     MatProgressSpinnerModule,
+    MatIconModule,
     MatPaginatorModule,
     MatFormFieldModule,
     MatInputModule,
@@ -109,6 +112,7 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
     InvoiceService,
     NotificationService,
     InvoiceService,
+    DialogService,
     AppService,
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },

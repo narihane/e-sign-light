@@ -13,6 +13,8 @@ import { catchError, map, startWith, switchMap, tap } from 'rxjs/operators';
 import { SelectionModel } from '@angular/cdk/collections';
 import { transpileModule } from 'typescript';
 import { FormControl, FormGroup } from '@angular/forms';
+import { EditInvoiceComponent } from '../shared/edit-invoice/edit-invoice.component';
+import { DialogService } from '../shared/_services/dialog.service';
 
 @Component({
   selector: 'app-pending-invoices',
@@ -49,7 +51,8 @@ export class PendingInvoicesComponent implements AfterViewInit {
     public dialog: MatDialog,
     private invoiceService: InvoiceService,
     private documentService: DocumentService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    public dialogService: DialogService
   ) {
     // Assign the data to the data source for the table to render
     this.dataSource = new MatTableDataSource();
@@ -60,13 +63,16 @@ export class PendingInvoicesComponent implements AfterViewInit {
   ngOnInit() {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    this.invoiceService.getAllInvoices(0, 5, this.range).subscribe((data) => {
-      this.documentModel = data;
-      this.dataSource = new MatTableDataSource(data.invoices);
-      this.isLoadingResults = false;
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-    });
+    const sortDate = this.dataSource.sort?.direction === 'asc' ? 1 : 0;
+    this.invoiceService
+      .getAllInvoices(0, 5, this.range, sortDate)
+      .subscribe((data) => {
+        this.documentModel = data;
+        this.dataSource = new MatTableDataSource(data.invoices);
+        this.isLoadingResults = false;
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+      });
   }
 
   ngAfterViewInit() {
@@ -78,13 +84,15 @@ export class PendingInvoicesComponent implements AfterViewInit {
   }
 
   loadDocumentsPage() {
-    console.log(this.paginator.pageIndex);
     this.isLoadingResults = true;
+    const sortDate = this.dataSource.sort?.direction === 'asc' ? 1 : 0;
+    console.log(this.dataSource.sort?.direction);
     this.invoiceService
       .getAllInvoices(
         this.paginator.pageIndex,
         this.paginator.pageSize,
-        this.range
+        this.range,
+        sortDate
       )
       .subscribe((data) => {
         this.documentModel = data;
@@ -171,7 +179,23 @@ export class PendingInvoicesComponent implements AfterViewInit {
     this.ableToSubmit = true;
   }
 
-  editInvoice(obj) {}
+  editInvoice(obj) {
+    const dialogRef = this.dialog.open(EditInvoiceComponent, {
+      data: { row: obj },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === 1) {
+        this.invoiceService.editInvoice(this.dialogService.getDialogData());
+      }
+    });
+  }
+
+  deleteItem(id) {
+    this.invoiceService.deleteInvoiceById(id).subscribe((data) => {
+      this.loadDocumentsPage();
+    });
+  }
 
   dateRangeChange(
     dateRangeStart: HTMLInputElement,

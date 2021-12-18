@@ -12,7 +12,12 @@ import * as moment from 'moment';
 export class InvoiceService {
   constructor(private http: HttpClient) {}
 
-  getAllInvoices(pageNumber: number, pageSize: number, dateRange: FormGroup) {
+  getAllInvoices(
+    pageNumber: number,
+    pageSize: number,
+    dateRange: FormGroup,
+    sortDate: number
+  ) {
     const token = localStorage.getItem('currentUser');
     console.log('old', pageNumber);
     pageNumber = pageNumber + 1;
@@ -29,7 +34,8 @@ export class InvoiceService {
     return this.http
       .get<Documents>(
         environment.backendUrl +
-          `/api/Invoices/get?pageNumber=${pageNumber}&pageSize=${pageSize}&from=${dateStart}&to=${dateEnd}`,
+          `/api/Invoices/get?pageNumber=${pageNumber}&pageSize=${pageSize}&from=${dateStart}&to=${dateEnd}
+          &sortByDate=${sortDate}`,
         { headers: new HttpHeaders().set('Authorization', 'Bearer ' + token!) }
       )
       .pipe(
@@ -40,8 +46,29 @@ export class InvoiceService {
       );
   }
 
-  getInvoiceById(id: number) {
-    return this.http.get<Document>(`/api/Invoices/get/${id}`);
+  getInvoiceById(id: string) {
+    const token = localStorage.getItem('currentUser');
+    return this.http.get<Document>(
+      environment.backendUrl + `/api/Invoices/get/${id}`,
+      { headers: new HttpHeaders().set('Authorization', 'Bearer ' + token!) }
+    );
+  }
+
+  deleteInvoiceById(id: string) {
+    const token = localStorage.getItem('currentUser');
+    return this.http.delete<Document>(
+      environment.backendUrl + `/api/Invoices/delete/${id}`,
+      { headers: new HttpHeaders().set('Authorization', 'Bearer ' + token!) }
+    );
+  }
+
+  editInvoice(document: Document) {
+    const token = localStorage.getItem('currentUser');
+    return this.http.put<Document>(
+      environment.backendUrl + `/api/Invoices/edit`,
+      document,
+      { headers: new HttpHeaders().set('Authorization', 'Bearer ' + token!) }
+    );
   }
 
   saveInvoice(invoice: InvoiceDocument) {
@@ -55,4 +82,9 @@ export class InvoiceService {
     //   return data;
     // }));
   }
+}
+
+export enum SortDate {
+  Asc = 1,
+  Desc = 0,
 }
