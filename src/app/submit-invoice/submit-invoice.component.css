@@ -28,7 +28,27 @@
   text-align: center;
 }
 
+.mat-column-value_diff {
+  max-width: 100px;
+  text-align: center;
+}
+
+.mat-column-total_taxable_fees {
+  max-width: 100px;
+  text-align: center;
+}
+
+.mat-column-tax {
+  max-width: 50px;
+  text-align: center;
+}
+
 .mat-column-discount {
+  max-width: 80px;
+  text-align: center;
+}
+
+.mat-column-netTotal {
   max-width: 100px;
   text-align: center;
 }
@@ -104,12 +124,25 @@ tr.example-element-row:not(.example-expanded-row):active {
 .mat-cell {
   min-width: 80px;
   box-sizing: border-box;
+  margin-left: 10px;
+  text-align: center;
+  align-self: center;
 }
 
 .mat-header-row,
 .mat-footer-row,
 .mat-row {
-  min-width: 1920px; /* 24 columns, 80px each */
+  min-width: 1400px; /* 24 columns, 80px each */
+}
+
+.Icon-inside {
+  position: relative;
+}
+
+.Icon-inside i {
+  position: absolute;
+  right: 5px;
+  top: 10px;
 }
 
 .mat-table-sticky-border-elem-top {

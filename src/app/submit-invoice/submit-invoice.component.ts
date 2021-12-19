@@ -84,6 +84,7 @@ export class SubmitInvoiceComponent implements OnInit {
     client_email: new FormControl('', {
       validators: [Validators.required, Validators.email],
     }),
+    total_tax: new FormControl({}, [Validators.required]),
   });
   displayedColumns = [
     'actions',
@@ -123,6 +124,8 @@ export class SubmitInvoiceComponent implements OnInit {
   //Tax Variables
   totalTax = 0;
   taxArr = new Tax().final_tax_arr;
+  displayColumnTax = ['tax_type', 'amount'];
+  dataTax = new MatTableDataSource();
 
   currentInvoiceLineIdx = 0;
 
@@ -144,7 +147,7 @@ export class SubmitInvoiceComponent implements OnInit {
 
   ngOnInit(): void {
     this.dataSource = new MatTableDataSource(this.items().controls);
-    // this.populateCategories();
+    this.populateCategories();
   }
 
   populateCategories() {
@@ -190,7 +193,7 @@ export class SubmitInvoiceComponent implements OnInit {
     this.items().push(this.newInvoice());
     var arr = this.invoiceForm.get('items') as FormArray;
     arr.value.forEach((e: any) => {
-      if (e['price'] > 0) this.totalPrice += parseFloat(e['price']);
+      if (e['netTotal'] > 0) this.totalPrice += parseFloat(e['netTotal']);
       console.log(this.totalPrice);
     });
 
@@ -531,6 +534,39 @@ export class SubmitInvoiceComponent implements OnInit {
 
   displayedAmount(idxInvoice: number, idxTax: number) {
     return this.taxes(idxInvoice).value[idxTax]['amount'];
+  }
+
+  deleteTax(i: number) {
+    this.taxes(i).removeAt(i);
+  }
+
+  calculateTotalTax() {
+    var arr = this.invoiceForm.get('items') as FormArray;
+    // var dict = this.invoiceForm.get('fixed')?.get('total_tax')?.value;
+    var dict = {};
+    arr.value.forEach((e: any) => {
+      if (e['tax'].length > 0) {
+        e['tax'].forEach((e1) => {
+          if (dict[e1.type]) {
+            dict[e1.type] += parseFloat(e1.amount);
+          } else {
+            dict[e1.type] = parseFloat(e1.amount);
+          }
+        });
+      }
+    });
+    var arr1: any[] = [];
+    for (var key in dict) {
+      console.log(key);
+      if (dict.hasOwnProperty(key)) {
+        arr1.push([key, dict[key]]);
+      }
+    }
+    console.log(arr1);
+    this.invoiceForm.get('fixed')?.get('total_tax')?.setValue(dict);
+    this.dataTax = new MatTableDataSource(arr1);
+    console.log(this.dataTax);
+    console.log(this.invoiceForm.get('fixed')?.get('total_tax')?.value);
   }
 }
 
