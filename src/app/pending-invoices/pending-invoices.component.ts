@@ -175,6 +175,9 @@ export class PendingInvoicesComponent implements AfterViewInit {
     });
   }
 
+  // TODO!
+  deleteSelected() {}
+
   isAnySelected() {
     this.ableToSubmit = true;
   }

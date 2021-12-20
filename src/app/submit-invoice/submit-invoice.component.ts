@@ -5,7 +5,13 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
-import { Component, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import {
+  AfterViewChecked,
+  Component,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
+} from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -52,7 +58,7 @@ export interface ItemTax {
     ]),
   ],
 })
-export class SubmitInvoiceComponent implements OnInit {
+export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
   expandedElement!: ItemTax | null;
   //Main form group
   invoiceForm: FormGroup;
@@ -150,6 +156,15 @@ export class SubmitInvoiceComponent implements OnInit {
     this.populateCategories();
   }
 
+  ngAfterViewChecked(): void {
+    this.totalPrice = 0;
+    var arr = this.invoiceForm.get('items') as FormArray;
+    arr.value.forEach((e: any) => {
+      if (e['netTotal'] > 0) this.totalPrice += parseFloat(e['netTotal']);
+      console.log(this.totalPrice);
+    });
+  }
+
   populateCategories() {
     this.codeService.getCodes(1, 10).subscribe((data) => {
       this.categories = data;
@@ -191,11 +206,6 @@ export class SubmitInvoiceComponent implements OnInit {
 
   addItem() {
     this.items().push(this.newInvoice());
-    var arr = this.invoiceForm.get('items') as FormArray;
-    arr.value.forEach((e: any) => {
-      if (e['netTotal'] > 0) this.totalPrice += parseFloat(e['netTotal']);
-      console.log(this.totalPrice);
-    });
 
     this.invoiceForm.get('fixed')?.get('totalPrice')?.setValue(this.totalPrice);
     this.dataSource = new MatTableDataSource(
@@ -257,20 +267,13 @@ export class SubmitInvoiceComponent implements OnInit {
               currencySold: element.currency,
               amountEGP: element.price,
             },
-            valueDifference: 0.0,
-            totalTaxableFees: 0,
+            valueDifference: element.value_diff,
+            totalTaxableFees: element.total_taxable_fees,
             discount: {
               rate: element.discount,
               amount: (element.discount / 100) * element.price,
             },
-            taxableItems: [
-              {
-                taxType: 'T1',
-                amount: 18,
-                subType: 'V001',
-                rate: 0,
-              },
-            ],
+            taxableItems: element.tax,
           });
 
           this.invoiceValue = this.invoiceForm.value;
