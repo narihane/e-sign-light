@@ -14,6 +14,7 @@ import { SubmitInvoiceComponent } from './submit-invoice/submit-invoice.componen
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
+  { path: 'e-sign-light', component: LoginComponent },
   {
     path: '', component: SidebarComponent, canActivate: [AuthGuard],
     children:
