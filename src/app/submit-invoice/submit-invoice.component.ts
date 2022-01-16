@@ -109,7 +109,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
     'netTotal',
   ];
   taxItems = new FormGroup({
-    type: new FormControl('', [Validators.required]),
+    taxType: new FormControl('', [Validators.required]),
     subType: new FormControl('', [Validators.required]),
     rate: new FormControl('', [Validators.required]),
     amount: new FormControl('', [Validators.required]),
@@ -148,9 +148,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
       items: this.fb.array([this.itemForm]),
       fixed: this.fixedForm,
     });
-    console.log(this.invoiceForm);
     this.dataSource = new MatTableDataSource(this.items().controls);
-    console.log(this.dataSource.data);
   }
 
   ngOnInit(): void {
@@ -163,7 +161,6 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
     var arr = this.invoiceForm.get('items') as FormArray;
     arr.value.forEach((e: any) => {
       if (e['netTotal'] > 0) this.totalPrice += parseFloat(e['netTotal']);
-      console.log(this.totalPrice);
     });
     this.totalDiscount = 0;
     arr.value.forEach((e) => {
@@ -172,7 +169,6 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
           e['quantity'] *
           parseFloat(e['price']) *
           (parseFloat(e['discount']) / 100);
-      console.log(this.totalDiscount);
     });
 
     this.calculateTotalTax();
@@ -182,7 +178,6 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
     this.codeService.getCodes(1, 10).subscribe((data) => {
       this.categories = data;
     });
-    console.log(this.categories);
   }
 
   setCurrentInvoiceIdx(i: number) {
@@ -239,7 +234,6 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
       itemFormValue['quantity'] * parseFloat(itemFormValue['price']);
     const discount = ((100 - itemFormValue['discount']) / 100) * salesTotal;
     this.invoiceForm.get(['items', i, 'netTotal'])?.setValue(discount);
-    console.log(this.invoiceForm.get(['items', i, 'netTotal']));
   }
 
   onInvoiceAdd() {
@@ -268,7 +262,6 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
     //All invoice lines in one array
     var invoiceLines: InvoiceLine[] = [];
     this.invoiceForm.get('items')?.value.forEach((element) => {
-      console.log('here', element);
       var itemType = '';
       var itemCode = '';
       this.codeService
@@ -302,7 +295,6 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
           });
 
           this.invoiceValue = this.invoiceForm.value;
-          console.log(this.invoiceForm.value);
           this.issuerService.getIssuer().subscribe((data) => {
             this.regNum = data[0].registrationNumber;
 
@@ -393,14 +385,13 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
   }
 
   addTax(i: number) {
-    console.log(this.invoiceForm);
     this.taxes(i).push(this.newTax());
   }
 
   getT3Value(idx: number) {
     let t3Amount = 0;
     this.taxes(idx).value.forEach((e: any, i: number) => {
-      if (e['type'] == 'T3') {
+      if (e['taxType'] == 'T3') {
         t3Amount = parseFloat(e['amount']);
       }
     });
@@ -412,7 +403,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
     this.taxes(idx).value.forEach((e: any, i: number) => {
       debugger;
       if (i == idxTax) {
-        switch (e['type']) {
+        switch (e['taxType']) {
           case 'T1':
             //Amount = (Amount+Net Total + TotalTaxableFees+Value Diff + Taxable item.Amount)*Rate - > Taxable item.Amount == sum of all items in taxable array, TotalTaxableFees== field a user enters
             e['amount'] =
@@ -426,7 +417,6 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
               .get(['items', idx, 'tax'])
               ?.get([i, 'amount'])
               ?.setValue(e['amount']);
-            console.log(e['amount']);
             // this.invoiceForm.get(['items', i, 'netTotal'])?.setValue(discount);
             break;
           case 'T2':
@@ -515,7 +505,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
 
   displaySubTax(idxTax: number, i: number) {
     const taxFormValue = this.taxes(idxTax).value[i];
-    if (taxFormValue['type'] == '') {
+    if (taxFormValue['taxType'] == '') {
       return true;
     } else {
       return false;
@@ -524,19 +514,19 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
 
   displayAmount(idxInvoice: number, i: number) {
     return this.taxArr.filter(
-      (e1) => this.taxes(idxInvoice).value[i]['type'] === e1.Code
+      (e1) => this.taxes(idxInvoice).value[i]['taxType'] === e1.Code
     )[0]?.amount;
   }
 
   displayRate(idxInvoice: number, i: number) {
     return this.taxArr.filter(
-      (e1) => this.taxes(idxInvoice).value[i]['type'] === e1.Code
+      (e1) => this.taxes(idxInvoice).value[i]['taxType'] === e1.Code
     )[0]?.rate;
   }
 
   subTaxArray(idxInvoice: number, i: number) {
     return this.taxArr.filter(
-      (e1) => this.taxes(idxInvoice).value[i]['type'] === e1.Code
+      (e1) => this.taxes(idxInvoice).value[i]['taxType'] === e1.Code
     )[0]?.sub_tax;
   }
 
@@ -549,7 +539,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
   calculateTotalItemTaxes(idxInvoice: number) {
     let taxInvoiceLine = 0;
     this.taxes(idxInvoice).value.forEach((e: any, i: number) => {
-      if (e['type'] != 'T1') {
+      if (e['taxType'] != 'T1') {
         taxInvoiceLine += parseFloat(e['amount']);
       }
     });
@@ -563,7 +553,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
       ?.setValue(totalTaxInvoiceLines);
     debugger;
     this.taxes(idxInvoice).value.forEach((e: any, i: number) => {
-      if (e['type'] === 'T1') {
+      if (e['taxType'] === 'T1') {
         e['amount'] =
           (0 +
             this.invoiceForm.get(['items', idxInvoice, 'netTotal'])?.value +
@@ -582,7 +572,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
 
   recalculateT2(idxInvoice: number, t3Amount: number) {
     this.taxes(idxInvoice).value.forEach((e: any, i: number) => {
-      if (e['type'] == 'T2') {
+      if (e['taxType'] == 'T2') {
         debugger;
         e['amount'] =
           (this.invoiceForm.get(['items', idxInvoice, 'netTotal'])?.value +
@@ -615,33 +605,28 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
     arr.value.forEach((e: any) => {
       if (e['tax'].length > 0) {
         e['tax'].forEach((e1) => {
-          if (dict[e1.type]) {
-            dict[e1.type] += parseFloat(e1.amount);
+          if (dict[e1.taxType]) {
+            dict[e1.taxType] += parseFloat(e1.amount);
           } else {
-            dict[e1.type] = parseFloat(e1.amount);
+            dict[e1.taxType] = parseFloat(e1.amount);
           }
         });
       }
     });
     var arr1: any[] = [];
     for (var key in dict) {
-      console.log(key);
       if (dict.hasOwnProperty(key)) {
         arr1.push([key, dict[key]]);
       }
     }
-    console.log(arr1);
     this.invoiceForm.get('fixed')?.get('total_tax')?.setValue(dict);
     this.dataTax = new MatTableDataSource(arr1);
-    console.log(this.dataTax);
-    console.log(this.invoiceForm.get('fixed')?.get('total_tax')?.value);
   }
 }
 
 function ValidateTotalPrice(
   control: AbstractControl
 ): { [key: string]: any } | null {
-  console.log(control.get('fixed')?.get('client_id')?.value);
   if (
     control.value &&
     control.get('fixed')?.get('client_id')?.value === '' &&
