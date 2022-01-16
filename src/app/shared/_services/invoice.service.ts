@@ -73,7 +73,7 @@ export class InvoiceService {
 
   saveInvoice(invoice: InvoiceDocument) {
     const token = localStorage.getItem('currentUser');
-    return this.http.post<string>(
+    return this.http.post<any>(
       environment.backendUrl + '/api/invoices/save',
       invoice,
       { headers: new HttpHeaders().set('Authorization', 'Bearer ' + token!) }

@@ -27,6 +27,7 @@ import {
   Document,
   InvoiceDocument,
   InvoiceLine,
+  TotalTax,
 } from '../shared/_models/AE-invoice.model';
 import { CodeSearch } from '../shared/_models/codes.models';
 import { Invoice, Item, ItemNames } from '../shared/_models/invoice.model';
@@ -78,6 +79,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
     date: new FormControl('', [Validators.required]),
     branch: new FormControl('', [Validators.required]),
     totalPrice: new FormControl(0, [Validators.required]),
+    totalDiscount: new FormControl(0, [Validators.required]),
     netAmount: new FormControl('', [Validators.required]),
     payment_type: new FormControl('', [Validators.required]),
     client_name: new FormControl('', [Validators.required]),
@@ -163,6 +165,17 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
       if (e['netTotal'] > 0) this.totalPrice += parseFloat(e['netTotal']);
       console.log(this.totalPrice);
     });
+    this.totalDiscount = 0;
+    arr.value.forEach((e) => {
+      if (e['discount'] > 0)
+        this.totalDiscount +=
+          e['quantity'] *
+          parseFloat(e['price']) *
+          (parseFloat(e['discount']) / 100);
+      console.log(this.totalDiscount);
+    });
+
+    this.calculateTotalTax();
   }
 
   populateCategories() {
@@ -194,7 +207,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
       discount: new FormControl('', [Validators.required]),
       tax: this.fb.array([
         new FormGroup({
-          type: new FormControl('', [Validators.required]),
+          taxType: new FormControl('', [Validators.required]),
           subType: new FormControl('', [Validators.required]),
           rate: new FormControl('', [Validators.required]),
           amount: new FormControl('', [Validators.required]),
@@ -245,6 +258,14 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
       console.log('Invalid');
     }
 
+    var taxTotals: TotalTax[] = [];
+    this.dataTax.data.forEach((e: any) => {
+      taxTotals.push({
+        taxType: e[0],
+        amount: parseInt(e[1]),
+      });
+    });
+    //All invoice lines in one array
     var invoiceLines: InvoiceLine[] = [];
     this.invoiceForm.get('items')?.value.forEach((element) => {
       console.log('here', element);
@@ -262,16 +283,20 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
             itemCode: itemCode,
             unitType: 'EA', //element.unitType,
             quantity: element.quantity,
+            internalCode: 'IC0',
             itemsDiscount: element.discount,
             unitValue: {
-              currencySold: element.currency,
+              currencySold: 'EG', //element.currency,
               amountEGP: element.price,
+              currencyExchangeRate: 0,
+              amountSold: 0,
             },
             valueDifference: element.value_diff,
             totalTaxableFees: element.total_taxable_fees,
             discount: {
               rate: element.discount,
-              amount: (element.discount / 100) * element.price,
+              amount:
+                (element.discount / 100) * element.price * element.quantity,
             },
             taxableItems: element.tax,
           });
@@ -282,6 +307,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
             this.regNum = data[0].registrationNumber;
 
             var invoice: Document = {
+              references: [],
               issuer: {
                 id: this.regNum,
               },
@@ -312,7 +338,31 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
               documentType: 'I',
               documentTypeVersion: '0.9',
               dateTimeIssued: new Date(),
-              taxpayerActivityCode: '4610',
+              taxpayerActivityCode: '4610', //TODO: get from settings
+              purchaseOrderReference: 'P-233-A6375',
+              purchaseOrderDescription: 'purchase Order description',
+              salesOrderReference: '1231',
+              salesOrderDescription: 'Sales Order description',
+              proformaInvoiceNumber: 'SomeValue',
+              payment: {
+                bankName: 'SomeValue',
+                bankAddress: 'SomeValue',
+                bankAccountNo: 'SomeValue',
+                bankAccountIBAN: '',
+                swiftCode: '',
+                terms: 'SomeValue',
+              },
+              delivery: {
+                approach: 'SomeValue',
+                packaging: 'SomeValue',
+                dateValidity: '2020-09-28T09:30:10Z',
+                exportPort: 'SomeValue',
+                grossWeight: 10.5,
+                netWeight: 20.5,
+                terms: 'SomeValue',
+                countryOfOrigin: 'EG',
+              },
+              taxTotals: taxTotals,
               invoiceLines: invoiceLines,
             };
             console.log(invoice);
@@ -320,6 +370,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
               documents: [invoice],
             };
             this.invoiceService.saveInvoice(inv).subscribe((data) => {
+              console.log(inv);
               console.log(data);
             });
           });
@@ -334,7 +385,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
 
   newTax(): FormGroup {
     return new FormGroup({
-      type: new FormControl('', [Validators.required]),
+      taxType: new FormControl('', [Validators.required]),
       subType: new FormControl('', [Validators.required]),
       rate: new FormControl('', [Validators.required]),
       amount: new FormControl('', [Validators.required]),
@@ -396,12 +447,21 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
             break;
           case 'T3':
             // Fixed Amount = Rate should be zero
+            e['rate'] = 0.0;
+            this.invoiceForm
+              .get(['items', idx, 'tax'])
+              ?.get([i, 'rate'])
+              ?.setValue(e['rate']);
             t3Amount = parseFloat(e['amount']);
             this.recalculateT2(idx, t3Amount);
             // this.recalculateT1(idx, e['amount']);
             break;
           case 'T4':
             // Amount = taxableItem(T4).Rate * (Net total - discount)
+            e['amount'] =
+              (parseFloat(e['rate']) / 100) *
+              (this.invoiceForm.get(['items', idx, 'netTotal'])?.value -
+                this.invoiceForm.get(['items', idx, 'discount'])?.value);
             this.recalculateT1(idx, e['amount']);
             break;
 
@@ -409,6 +469,11 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
 
           case 'T6':
             // Fixed Amount = Rate should be zero
+            e['rate'] = 0.0;
+            this.invoiceForm
+              .get(['items', idx, 'tax'])
+              ?.get([i, 'rate'])
+              ?.setValue(e['rate']);
             this.recalculateT1(idx, e['amount']);
             break;
           case 'T5':

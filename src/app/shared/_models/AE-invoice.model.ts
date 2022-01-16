@@ -34,16 +34,19 @@ export interface Payment {
 export interface Delivery {
   approach: string;
   packaging: string;
-  dateValidity: Date;
+  dateValidity: string;
   exportPort: string;
   grossWeight: number;
   netWeight: number;
   terms: string;
+  countryOfOrigin:string;
 }
 
 export interface UnitValue {
   currencySold: string;
   amountEGP: number;
+  currencyExchangeRate:number;
+  amountSold: number;
 }
 
 export interface Discount {
@@ -73,7 +76,13 @@ export interface InvoiceLine {
   taxableItems?: TaxableItem[];
 }
 
+export interface TotalTax{
+  taxType:string;
+  amount:number;
+}
+
 export interface Document {
+  references:[];
   issuer: Issuer;
   receiver: Receiver;
   documentType: string;
@@ -90,6 +99,7 @@ export interface Document {
   delivery?: Delivery;
   invoiceLines: InvoiceLine[];
   extraDiscountAmount?: number;
+  taxTotals?:TotalTax[];
 }
 
 export interface InvoiceDocument {
