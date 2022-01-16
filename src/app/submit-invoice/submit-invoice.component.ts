@@ -23,6 +23,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
+import { map } from 'rxjs/operators';
 import {
   Document,
   InvoiceDocument,
@@ -361,10 +362,9 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
             const inv: InvoiceDocument = {
               documents: [invoice],
             };
-            this.invoiceService.saveInvoice(inv).subscribe((data) => {
-              console.log(inv);
-              console.log(data);
-            });
+            this.invoiceService.saveInvoice(inv).subscribe((data)=>{
+              console.log(data)
+            })
           });
         });
     });

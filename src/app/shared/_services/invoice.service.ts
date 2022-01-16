@@ -7,6 +7,7 @@ import { environment } from 'src/environments/environment';
 import { map } from 'rxjs/operators';
 import { FormGroup } from '@angular/forms';
 import * as moment from 'moment';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class InvoiceService {
@@ -71,16 +72,17 @@ export class InvoiceService {
     );
   }
 
-  saveInvoice(invoice: InvoiceDocument) {
+  saveInvoice(invoice: InvoiceDocument): Observable<any> {
     const token = localStorage.getItem('currentUser');
-    return this.http.post<any>(
-      environment.backendUrl + '/api/invoices/save',
-      invoice,
-      { headers: new HttpHeaders().set('Authorization', 'Bearer ' + token!) }
-    );
-    // .pipe(map((data: string) => {
-    //   return data;
-    // }));
+    return this.http
+      .post<any>(environment.backendUrl + '/api/invoices/save', invoice, {
+        headers: new HttpHeaders().set('Authorization', 'Bearer ' + token!),
+      })
+      .pipe(
+        map((data: any) => {
+          return data;
+        })
+      );
   }
 }
 

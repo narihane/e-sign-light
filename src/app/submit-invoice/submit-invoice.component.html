@@ -1,10 +1,5 @@
 <div class="card card-register">
-  <form
-    class="form"
-    [formGroup]="invoiceForm"
-    (ngSubmit)="onInvoiceAdd()"
-    autocomplete="off"
-  >
+  <form class="form" [formGroup]="invoiceForm" autocomplete="off">
     <div class="card-body">
       <div formArrayName="fixed">
         <h3>Choose Receiver Type</h3>
@@ -820,14 +815,16 @@
             >
               Add Row
             </button>
-            <button
-              href="javascript:void(0)"
-              [useExistingCss]="true"
-              type="submit"
+
+            <!-- [useExistingCss]="true"
+              
               printSectionId="myFormPrint"
-              ngxPrint
+              ngxPrint 
+            printTitle=""-->
+            <button
+              (click)="onInvoiceAdd()"
+              href="javascript:void(0)"
               class="btn btn-primary btn-round btn-lg"
-              printTitle=""
             >
               Submit
             </button>
