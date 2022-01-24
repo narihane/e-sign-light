@@ -8,10 +8,12 @@ import {
 import {
   AfterViewChecked,
   Component,
+  Inject,
   OnChanges,
   OnInit,
   SimpleChanges,
 } from '@angular/core';
+import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import {
   AbstractControl,
   FormArray,
@@ -23,10 +25,12 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
+import { map } from 'rxjs/operators';
 import {
   Document,
   InvoiceDocument,
   InvoiceLine,
+  TotalTax,
 } from '../shared/_models/AE-invoice.model';
 import { CodeSearch } from '../shared/_models/codes.models';
 import { Invoice, Item, ItemNames } from '../shared/_models/invoice.model';
@@ -35,6 +39,7 @@ import { AppService } from '../shared/_services/app.service';
 import { CodesService } from '../shared/_services/codes.service';
 import { InvoiceService } from '../shared/_services/invoice.service';
 import { IssuerService } from '../shared/_services/issuer.service';
+import { Router } from '@angular/router';
 
 export interface ItemTax {
   type: string;
@@ -78,6 +83,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
     date: new FormControl('', [Validators.required]),
     branch: new FormControl('', [Validators.required]),
     totalPrice: new FormControl(0, [Validators.required]),
+    totalDiscount: new FormControl(0, [Validators.required]),
     netAmount: new FormControl('', [Validators.required]),
     payment_type: new FormControl('', [Validators.required]),
     client_name: new FormControl('', [Validators.required]),
@@ -107,7 +113,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
     'netTotal',
   ];
   taxItems = new FormGroup({
-    type: new FormControl('', [Validators.required]),
+    taxType: new FormControl('', [Validators.required]),
     subType: new FormControl('', [Validators.required]),
     rate: new FormControl('', [Validators.required]),
     amount: new FormControl('', [Validators.required]),
@@ -140,15 +146,14 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
     private appService: AppService,
     private codeService: CodesService,
     private invoiceService: InvoiceService,
-    private issuerService: IssuerService
+    private issuerService: IssuerService,
+    public dialog: MatDialog
   ) {
     this.invoiceForm = this.fb.group({
       items: this.fb.array([this.itemForm]),
       fixed: this.fixedForm,
     });
-    console.log(this.invoiceForm);
     this.dataSource = new MatTableDataSource(this.items().controls);
-    console.log(this.dataSource.data);
   }
 
   ngOnInit(): void {
@@ -161,15 +166,23 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
     var arr = this.invoiceForm.get('items') as FormArray;
     arr.value.forEach((e: any) => {
       if (e['netTotal'] > 0) this.totalPrice += parseFloat(e['netTotal']);
-      console.log(this.totalPrice);
     });
+    this.totalDiscount = 0;
+    arr.value.forEach((e) => {
+      if (e['discount'] > 0)
+        this.totalDiscount +=
+          e['quantity'] *
+          parseFloat(e['price']) *
+          (parseFloat(e['discount']) / 100);
+    });
+
+    this.calculateTotalTax();
   }
 
   populateCategories() {
     this.codeService.getCodes(1, 10).subscribe((data) => {
       this.categories = data;
     });
-    console.log(this.categories);
   }
 
   setCurrentInvoiceIdx(i: number) {
@@ -194,7 +207,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
       discount: new FormControl('', [Validators.required]),
       tax: this.fb.array([
         new FormGroup({
-          type: new FormControl('', [Validators.required]),
+          taxType: new FormControl('', [Validators.required]),
           subType: new FormControl('', [Validators.required]),
           rate: new FormControl('', [Validators.required]),
           amount: new FormControl('', [Validators.required]),
@@ -226,7 +239,6 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
       itemFormValue['quantity'] * parseFloat(itemFormValue['price']);
     const discount = ((100 - itemFormValue['discount']) / 100) * salesTotal;
     this.invoiceForm.get(['items', i, 'netTotal'])?.setValue(discount);
-    console.log(this.invoiceForm.get(['items', i, 'netTotal']));
   }
 
   onInvoiceAdd() {
@@ -245,9 +257,17 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
       console.log('Invalid');
     }
 
+    var taxTotals: TotalTax[] = [];
+    this.dataTax.data.forEach((e: any) => {
+      taxTotals.push({
+        taxType: e[0],
+        amount: parseInt(e[1]),
+      });
+    });
+    //All invoice lines in one array
     var invoiceLines: InvoiceLine[] = [];
     this.invoiceForm.get('items')?.value.forEach((element) => {
-      console.log('here', element);
+      console.log(element);
       var itemType = '';
       var itemCode = '';
       this.codeService
@@ -260,28 +280,33 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
             description: element.desc,
             itemType: itemType,
             itemCode: itemCode,
+            netTotal: element.netTotal,
             unitType: 'EA', //element.unitType,
             quantity: element.quantity,
+            internalCode: 'IC0',
             itemsDiscount: element.discount,
             unitValue: {
-              currencySold: element.currency,
+              currencySold: 'EG', //element.currency,
               amountEGP: element.price,
+              currencyExchangeRate: 0,
+              amountSold: 0,
             },
             valueDifference: element.value_diff,
             totalTaxableFees: element.total_taxable_fees,
             discount: {
               rate: element.discount,
-              amount: (element.discount / 100) * element.price,
+              amount:
+                (element.discount / 100) * element.price * element.quantity,
             },
             taxableItems: element.tax,
           });
 
           this.invoiceValue = this.invoiceForm.value;
-          console.log(this.invoiceForm.value);
           this.issuerService.getIssuer().subscribe((data) => {
             this.regNum = data[0].registrationNumber;
 
             var invoice: Document = {
+              references: [],
               issuer: {
                 id: this.regNum,
               },
@@ -312,18 +337,55 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
               documentType: 'I',
               documentTypeVersion: '0.9',
               dateTimeIssued: new Date(),
-              taxpayerActivityCode: '4610',
+              taxpayerActivityCode: '4610', //TODO: get from settings
+              purchaseOrderReference: 'P-233-A6375',
+              purchaseOrderDescription: 'purchase Order description',
+              salesOrderReference: '1231',
+              salesOrderDescription: 'Sales Order description',
+              proformaInvoiceNumber: 'SomeValue',
+              payment: {
+                bankName: 'SomeValue',
+                bankAddress: 'SomeValue',
+                bankAccountNo: 'SomeValue',
+                bankAccountIBAN: '',
+                swiftCode: '',
+                terms: 'SomeValue',
+              },
+              delivery: {
+                approach: 'SomeValue',
+                packaging: 'SomeValue',
+                dateValidity: '2020-09-28T09:30:10Z',
+                exportPort: 'SomeValue',
+                grossWeight: 10.5,
+                netWeight: 20.5,
+                terms: 'SomeValue',
+                countryOfOrigin: 'EG',
+              },
+              taxTotals: taxTotals,
               invoiceLines: invoiceLines,
             };
             console.log(invoice);
             const inv: InvoiceDocument = {
               documents: [invoice],
             };
-            this.invoiceService.saveInvoice(inv).subscribe((data) => {
-              console.log(data);
-            });
+            this.invoiceService.saveInvoice(inv);
+            this.openDialog();
           });
         });
+    });
+  }
+
+  openDialog() {
+    const dialogRef = this.dialog.open(DialogElementsExampleDialog, {
+      data: {
+        success: true,
+        id: '010101',
+        error_msg: 'hi',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      console.log('dialog closed');
     });
   }
 
@@ -334,7 +396,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
 
   newTax(): FormGroup {
     return new FormGroup({
-      type: new FormControl('', [Validators.required]),
+      taxType: new FormControl('', [Validators.required]),
       subType: new FormControl('', [Validators.required]),
       rate: new FormControl('', [Validators.required]),
       amount: new FormControl('', [Validators.required]),
@@ -342,14 +404,13 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
   }
 
   addTax(i: number) {
-    console.log(this.invoiceForm);
     this.taxes(i).push(this.newTax());
   }
 
   getT3Value(idx: number) {
     let t3Amount = 0;
     this.taxes(idx).value.forEach((e: any, i: number) => {
-      if (e['type'] == 'T3') {
+      if (e['taxType'] == 'T3') {
         t3Amount = parseFloat(e['amount']);
       }
     });
@@ -361,7 +422,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
     this.taxes(idx).value.forEach((e: any, i: number) => {
       debugger;
       if (i == idxTax) {
-        switch (e['type']) {
+        switch (e['taxType']) {
           case 'T1':
             //Amount = (Amount+Net Total + TotalTaxableFees+Value Diff + Taxable item.Amount)*Rate - > Taxable item.Amount == sum of all items in taxable array, TotalTaxableFees== field a user enters
             e['amount'] =
@@ -375,7 +436,6 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
               .get(['items', idx, 'tax'])
               ?.get([i, 'amount'])
               ?.setValue(e['amount']);
-            console.log(e['amount']);
             // this.invoiceForm.get(['items', i, 'netTotal'])?.setValue(discount);
             break;
           case 'T2':
@@ -396,12 +456,21 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
             break;
           case 'T3':
             // Fixed Amount = Rate should be zero
+            e['rate'] = 0.0;
+            this.invoiceForm
+              .get(['items', idx, 'tax'])
+              ?.get([i, 'rate'])
+              ?.setValue(e['rate']);
             t3Amount = parseFloat(e['amount']);
             this.recalculateT2(idx, t3Amount);
             // this.recalculateT1(idx, e['amount']);
             break;
           case 'T4':
             // Amount = taxableItem(T4).Rate * (Net total - discount)
+            e['amount'] =
+              (parseFloat(e['rate']) / 100) *
+              (this.invoiceForm.get(['items', idx, 'netTotal'])?.value -
+                this.invoiceForm.get(['items', idx, 'discount'])?.value);
             this.recalculateT1(idx, e['amount']);
             break;
 
@@ -409,6 +478,11 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
 
           case 'T6':
             // Fixed Amount = Rate should be zero
+            e['rate'] = 0.0;
+            this.invoiceForm
+              .get(['items', idx, 'tax'])
+              ?.get([i, 'rate'])
+              ?.setValue(e['rate']);
             this.recalculateT1(idx, e['amount']);
             break;
           case 'T5':
@@ -450,7 +524,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
 
   displaySubTax(idxTax: number, i: number) {
     const taxFormValue = this.taxes(idxTax).value[i];
-    if (taxFormValue['type'] == '') {
+    if (taxFormValue['taxType'] == '') {
       return true;
     } else {
       return false;
@@ -459,19 +533,19 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
 
   displayAmount(idxInvoice: number, i: number) {
     return this.taxArr.filter(
-      (e1) => this.taxes(idxInvoice).value[i]['type'] === e1.Code
+      (e1) => this.taxes(idxInvoice).value[i]['taxType'] === e1.Code
     )[0]?.amount;
   }
 
   displayRate(idxInvoice: number, i: number) {
     return this.taxArr.filter(
-      (e1) => this.taxes(idxInvoice).value[i]['type'] === e1.Code
+      (e1) => this.taxes(idxInvoice).value[i]['taxType'] === e1.Code
     )[0]?.rate;
   }
 
   subTaxArray(idxInvoice: number, i: number) {
     return this.taxArr.filter(
-      (e1) => this.taxes(idxInvoice).value[i]['type'] === e1.Code
+      (e1) => this.taxes(idxInvoice).value[i]['taxType'] === e1.Code
     )[0]?.sub_tax;
   }
 
@@ -484,7 +558,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
   calculateTotalItemTaxes(idxInvoice: number) {
     let taxInvoiceLine = 0;
     this.taxes(idxInvoice).value.forEach((e: any, i: number) => {
-      if (e['type'] != 'T1') {
+      if (e['taxType'] != 'T1') {
         taxInvoiceLine += parseFloat(e['amount']);
       }
     });
@@ -498,7 +572,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
       ?.setValue(totalTaxInvoiceLines);
     debugger;
     this.taxes(idxInvoice).value.forEach((e: any, i: number) => {
-      if (e['type'] === 'T1') {
+      if (e['taxType'] === 'T1') {
         e['amount'] =
           (0 +
             this.invoiceForm.get(['items', idxInvoice, 'netTotal'])?.value +
@@ -517,7 +591,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
 
   recalculateT2(idxInvoice: number, t3Amount: number) {
     this.taxes(idxInvoice).value.forEach((e: any, i: number) => {
-      if (e['type'] == 'T2') {
+      if (e['taxType'] == 'T2') {
         debugger;
         e['amount'] =
           (this.invoiceForm.get(['items', idxInvoice, 'netTotal'])?.value +
@@ -550,33 +624,28 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
     arr.value.forEach((e: any) => {
       if (e['tax'].length > 0) {
         e['tax'].forEach((e1) => {
-          if (dict[e1.type]) {
-            dict[e1.type] += parseFloat(e1.amount);
+          if (dict[e1.taxType]) {
+            dict[e1.taxType] += parseFloat(e1.amount);
           } else {
-            dict[e1.type] = parseFloat(e1.amount);
+            dict[e1.taxType] = parseFloat(e1.amount);
           }
         });
       }
     });
     var arr1: any[] = [];
     for (var key in dict) {
-      console.log(key);
       if (dict.hasOwnProperty(key)) {
         arr1.push([key, dict[key]]);
       }
     }
-    console.log(arr1);
     this.invoiceForm.get('fixed')?.get('total_tax')?.setValue(dict);
     this.dataTax = new MatTableDataSource(arr1);
-    console.log(this.dataTax);
-    console.log(this.invoiceForm.get('fixed')?.get('total_tax')?.value);
   }
 }
 
 function ValidateTotalPrice(
   control: AbstractControl
 ): { [key: string]: any } | null {
-  console.log(control.get('fixed')?.get('client_id')?.value);
   if (
     control.value &&
     control.get('fixed')?.get('client_id')?.value === '' &&
@@ -598,4 +667,24 @@ export function creatDateRangeValidator(): ValidatorFn {
 
     return null;
   };
+}
+
+@Component({
+  selector: 'successdialog',
+  templateUrl: 'successdialog.html',
+})
+export class DialogElementsExampleDialog {
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: DialogData,
+    private router: Router
+  ) {}
+  route() {
+    this.router.navigate(['/pending-invoices']);
+  }
+}
+
+export interface DialogData {
+  success: true;
+  id: string;
+  error_msg: string;
 }
