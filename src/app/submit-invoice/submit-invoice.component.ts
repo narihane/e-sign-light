@@ -8,10 +8,12 @@ import {
 import {
   AfterViewChecked,
   Component,
+  Inject,
   OnChanges,
   OnInit,
   SimpleChanges,
 } from '@angular/core';
+import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import {
   AbstractControl,
   FormArray,
@@ -37,6 +39,7 @@ import { AppService } from '../shared/_services/app.service';
 import { CodesService } from '../shared/_services/codes.service';
 import { InvoiceService } from '../shared/_services/invoice.service';
 import { IssuerService } from '../shared/_services/issuer.service';
+import { Router } from '@angular/router';
 
 export interface ItemTax {
   type: string;
@@ -143,7 +146,8 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
     private appService: AppService,
     private codeService: CodesService,
     private invoiceService: InvoiceService,
-    private issuerService: IssuerService
+    private issuerService: IssuerService,
+    public dialog: MatDialog
   ) {
     this.invoiceForm = this.fb.group({
       items: this.fb.array([this.itemForm]),
@@ -263,6 +267,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
     //All invoice lines in one array
     var invoiceLines: InvoiceLine[] = [];
     this.invoiceForm.get('items')?.value.forEach((element) => {
+      console.log(element);
       var itemType = '';
       var itemCode = '';
       this.codeService
@@ -275,6 +280,7 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
             description: element.desc,
             itemType: itemType,
             itemCode: itemCode,
+            netTotal: element.netTotal,
             unitType: 'EA', //element.unitType,
             quantity: element.quantity,
             internalCode: 'IC0',
@@ -362,11 +368,24 @@ export class SubmitInvoiceComponent implements OnInit, AfterViewChecked {
             const inv: InvoiceDocument = {
               documents: [invoice],
             };
-            this.invoiceService.saveInvoice(inv).subscribe((data)=>{
-              console.log(data)
-            })
+            this.invoiceService.saveInvoice(inv);
+            this.openDialog();
           });
         });
+    });
+  }
+
+  openDialog() {
+    const dialogRef = this.dialog.open(DialogElementsExampleDialog, {
+      data: {
+        success: true,
+        id: '010101',
+        error_msg: 'hi',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      console.log('dialog closed');
     });
   }
 
@@ -648,4 +667,24 @@ export function creatDateRangeValidator(): ValidatorFn {
 
     return null;
   };
+}
+
+@Component({
+  selector: 'successdialog',
+  templateUrl: 'successdialog.html',
+})
+export class DialogElementsExampleDialog {
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: DialogData,
+    private router: Router
+  ) {}
+  route() {
+    this.router.navigate(['/pending-invoices']);
+  }
+}
+
+export interface DialogData {
+  success: true;
+  id: string;
+  error_msg: string;
 }

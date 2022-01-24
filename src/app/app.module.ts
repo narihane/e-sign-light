@@ -41,7 +41,6 @@ import { IssuerService } from './shared/_services/issuer.service';
 import { NotificationService } from './shared/_services/notifications.service';
 import { ToastrModule, ToastrService } from 'ngx-toastr';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
 import { InvoiceService } from './shared/_services/invoice.service';
 import { PendingInvoicesComponent } from './pending-invoices/pending-invoices.component';
 import { DialogComponent } from './shared/dialog/dialog.component';
@@ -52,6 +51,8 @@ import { MatCurrencyFormatModule } from 'mat-currency-format';
 import { PercentageMaskDirective } from './shared/_directives/percentage-mask.directive';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { DialogService } from './shared/_services/dialog.service';
+import { DialogElementsExampleDialog } from './submit-invoice/submit-invoice.component';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -62,6 +63,7 @@ import { DialogService } from './shared/_services/dialog.service';
     CodeMappingComponent,
     RegisteredUsersComponent,
     LoginComponent,
+    DialogElementsExampleDialog,
     PendingInvoicesComponent,
     DialogComponent,
     SubmittedDocumentsComponent,
@@ -95,7 +97,6 @@ import { DialogService } from './shared/_services/dialog.service';
     MatPaginatorModule,
     MatFormFieldModule,
     MatInputModule,
-    MatDialogModule,
     MatButtonModule,
     MatSelectModule,
     ToastrModule.forRoot(),

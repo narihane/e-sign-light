@@ -57,7 +57,7 @@ export class InvoiceService {
 
   deleteInvoiceById(id: string) {
     const token = localStorage.getItem('currentUser');
-    return this.http.delete<Document>(
+    return this.http.delete<any>(
       environment.backendUrl + `/api/Invoices/delete/${id}`,
       { headers: new HttpHeaders().set('Authorization', 'Bearer ' + token!) }
     );
@@ -72,17 +72,30 @@ export class InvoiceService {
     );
   }
 
-  saveInvoice(invoice: InvoiceDocument): Observable<any> {
+  saveInvoice(invoice: InvoiceDocument) {
     const token = localStorage.getItem('currentUser');
+    let httpHeaders = new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + token!,
+    });
     return this.http
-      .post<any>(environment.backendUrl + '/api/invoices/save', invoice, {
-        headers: new HttpHeaders().set('Authorization', 'Bearer ' + token!),
+      .post(environment.backendUrl + '/api/invoices/save', invoice, {
+        headers: httpHeaders,
       })
-      .pipe(
-        map((data: any) => {
-          return data;
-        })
-      );
+      .toPromise()
+      .then((data) => console.log(data))
+      .catch((error) => console.log(error));
+
+    // var xhr = new XMLHttpRequest();
+    // xhr.open('POST', environment.backendUrl + '/api/invoices/save', true);
+    // xhr.setRequestHeader('Content-Type', 'application/json');
+    // xhr.setRequestHeader('Authorization', 'Bearer ' + token!);
+    // xhr.onreadystatechange = function () {
+    //   // if (xhr.readyState === 4 && xhr.status == 200) {
+    //   console.log(xhr.responseText);
+    //   // }
+    // };
+    // xhr.send(JSON.stringify(invoice));
   }
 }
 

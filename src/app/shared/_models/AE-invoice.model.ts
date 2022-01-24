@@ -16,10 +16,10 @@ export interface Address {
 }
 
 export interface Receiver {
-    address?: Address;
-    type?: string;
-    id?: string;
-    name: string;
+  address?: Address;
+  type?: string;
+  id?: string;
+  name: string;
 }
 
 export interface Payment {
@@ -39,13 +39,13 @@ export interface Delivery {
   grossWeight: number;
   netWeight: number;
   terms: string;
-  countryOfOrigin:string;
+  countryOfOrigin: string;
 }
 
 export interface UnitValue {
   currencySold: string;
   amountEGP: number;
-  currencyExchangeRate:number;
+  currencyExchangeRate: number;
   amountSold: number;
 }
 
@@ -74,15 +74,16 @@ export interface InvoiceLine {
   unitValue: UnitValue;
   discount?: Discount;
   taxableItems?: TaxableItem[];
+  netTotal?: number;
 }
 
-export interface TotalTax{
-  taxType:string;
-  amount:number;
+export interface TotalTax {
+  taxType: string;
+  amount: number;
 }
 
 export interface Document {
-  references:[];
+  references: [];
   issuer: Issuer;
   receiver: Receiver;
   documentType: string;
@@ -99,7 +100,7 @@ export interface Document {
   delivery?: Delivery;
   invoiceLines: InvoiceLine[];
   extraDiscountAmount?: number;
-  taxTotals?:TotalTax[];
+  taxTotals?: TotalTax[];
 }
 
 export interface InvoiceDocument {

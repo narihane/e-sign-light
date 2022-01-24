@@ -68,7 +68,15 @@ export class PendingInvoicesComponent implements AfterViewInit {
       .getAllInvoices(0, 5, this.range, sortDate)
       .subscribe((data) => {
         this.documentModel = data;
+
+        data.invoices.forEach((e1: any) => {
+          e1.invoiceLines.forEach((e) => {
+            if (e['netTotal'] > 0) e1['totalAmount'] += e['netTotal'];
+            console.log(e1['totalAmount']);
+          });
+        });
         this.dataSource = new MatTableDataSource(data.invoices);
+        console.log(data.invoices);
         this.isLoadingResults = false;
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
